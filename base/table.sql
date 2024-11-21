@@ -37,6 +37,7 @@ create table if not exists ticket(
     id serial primary key,
     temps_estime time not null,
     date date,
+    heure_prevu time,
 
     id_service int references service(id),
     id_visiteur int references visiteur(id)

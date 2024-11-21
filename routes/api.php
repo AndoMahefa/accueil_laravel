@@ -17,29 +17,26 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware(['auth:sanctum', 'check.token.expiration'])->group(function(){
+Route::middleware(['auth:sanctum', 'check.token.expiration'])->group(function () {
     Route::get('service/{id}', [ServiceController::class, 'show']);
 
-    Route::middleware('role:accueil')->group(function(){
+    Route::middleware('role:accueil')->group(function () {
         Route::apiResource('accueil/visiteurs', VisiteurController::class);
         Route::get('accueil/services/{idService}', [ServiceController::class, 'index']);
         Route::post('accueil/associe-visiteur-service', [ServiceController::class, 'associeVisiteur']);
         Route::post('accueil/file-d\'attente', [TicketController::class, 'ticketsLeJourJ']);
     });
-    Route::middleware('role:Ressources humaine|Directeur General|Daf')->group(function(){
+    Route::middleware('role:Ressources humaine|Directeur General|Daf')->group(function () {
         Route::get('services/{id}/demandes', [ServiceController::class, 'demandeVisiteursParService']);
         Route::post('/service/generer-ticket', [ServiceController::class, 'genererTicket']);
         Route::post('/service/refuser-demande', [ServiceController::class, 'refuserDemande']);
+        Route::post('/service/file-d\'attente', [TicketController::class, 'ticketsLeJourJ']);
     });
-    Route::middleware('role:Ressources humaine')->group(function(){
-
-    });
-    Route::middleware('role:Directeur General')->group(function(){
+    Route::middleware('role:Ressources humaine')->group(function () {});
+    Route::middleware('role:Directeur General')->group(function () {
         Route::apiResource('directeur-general/services', ServiceController::class);
     });
-    Route::middleware('role:Daf')->group(function(){
-
-    });
+    Route::middleware('role:Daf')->group(function () {});
 });
 
 Route::post('/login', [AuthController::class, 'login']);

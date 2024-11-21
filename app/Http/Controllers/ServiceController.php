@@ -7,6 +7,7 @@ use App\Services\TicketService;
 use App\Services\VisiteurService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class ServiceController extends Controller
 {
@@ -137,7 +138,7 @@ class ServiceController extends Controller
     {
         // Valider les données reçues
         $donnees = $request->validate([
-            'temps_estime' => 'required|regex:/^\d{2}:\d{2}/', // Format HH:mm
+            'temps_estime' => 'required|regex:/^\d{2}:\d{2}/', // Validation du champ temps_estime
             'id_service' => 'required|exists:service,id',
             'id_visiteur' => 'required|exists:visiteur,id'
         ]);
@@ -157,49 +158,58 @@ class ServiceController extends Controller
             return response()->json(['message' => 'Le visiteur n\'est pas associé à ce service'], 404);
         }
 
-        // Récupérer le dernier ticket pour ce service
-        $dernierTicket = $service->tickets()
-            ->orderBy('date', 'desc')
-            ->latest('temps_estime') // Dernier temps estimé
-            ->first();
+        // Récupérer le dernier ticket généré pour ce service
+        $dernierTicket = $this->ticketService->getLastTicketForService($donnees['id_service']);
 
-        // Calculer le nouveau temps estimé
-        $nouveauTempsEstime = Carbon::parse($donnees['temps_estime']);
-
+        // Calculer l'heure prévue pour le nouveau ticket
+        $heureValidation = Carbon::now(); // Heure actuelle
+        Log::info("Heure validation initial : " . $heureValidation);
+        Log::info("Temps estime" . $donnees['temps_estime']);
+        $tempsEstime = Carbon::createFromFormat('H:i', $donnees['temps_estime']);
+        $dernierTicketHeurePrevu = Carbon::createFromFormat('H:i', substr($dernierTicket->heure_prevu, 0, 5));
+        Log::info($dernierTicketHeurePrevu);
+        $dernierTicketTempsEstime = Carbon::createFromFormat('H:i', substr($dernierTicket->temps_estime, 0, 5));
         if ($dernierTicket) {
-            $dernierTemps = Carbon::parse($dernierTicket->temps_estime);
-            $nouveauTempsEstime->addMinutes($dernierTemps->hour * 60 + $dernierTemps->minute);
+            Log::info("Heure prevu du dernier ticket: " . $dernierTicket->heure_prevu);
+            $heurePrevue = $dernierTicketHeurePrevu
+                ->addMinutes($dernierTicketTempsEstime->hour * 60 + $dernierTicketTempsEstime->minute)
+                ->addMinutes($tempsEstime->hour * 60 + $tempsEstime->minute);
+            Log::info("Heure prevu apres calcul: " . $heurePrevue);
+        } else {
+            $heurePrevue = $heureValidation->copy()->addMinutes($tempsEstime->hour * 60 + $tempsEstime->minute);
+            Log::info("Heure prevu si il n'y a pas de dernier ticket: " . $heureValidation->copy()->addMinutes($tempsEstime->hour * 60 + $tempsEstime->minute));
         }
-
-        // Formatage en HH:mm
-        $donnees['temps_estime'] = $nouveauTempsEstime->format('H:i');
 
         // Mettre à jour le statut dans la table pivot
         $service->visiteurs()->updateExistingPivot($donnees['id_visiteur'], [
-            'statut' => 1, // Statut accepté
+            'statut' => 1, // Met le statut à "accepté"
         ]);
 
-        // Créer le ticket
+        // // Créer le ticket avec les détails nécessaires
         $ticketData = [
             'temps_estime' => $donnees['temps_estime'],
             'id_service' => $donnees['id_service'],
             'id_visiteur' => $donnees['id_visiteur'],
-            'date' => Carbon::now()
+            'date' => $heureValidation->toDateString(),
+            'heure_prevu' => $heurePrevue->toTimeString(),
         ];
 
         $ticket = $this->ticketService->create($ticketData);
 
-        // Retourner la réponse
+        // Retourner la réponse avec le ticket généré
         return response()->json([
             'message' => 'Ticket généré et statut du visiteur mis à jour avec succès.',
-            'ticket' => $ticket,
+            // 'ticket' => $ticket,
             'visiteur' => $visiteur,
             'service' => $service
         ], 200);
     }
 
 
-    public function refuserDemande(Request $request) {
+
+
+    public function refuserDemande(Request $request)
+    {
         $donnees = $request->validate([
             'id_visiteur' => 'required|exists:visiteur,id',
             'id_service' => 'required|exists:service,id'
@@ -211,7 +221,7 @@ class ServiceController extends Controller
         $visiteur = $this->visiteurService->findById($idVisiteur);
 
         if (!$service || !$visiteur) {
-            return response()->json(['message' => 'Service ou Visiteur non trouvé'], 404);    
+            return response()->json(['message' => 'Service ou Visiteur non trouvé'], 404);
         }
 
         $pivot = $service->visiteurs()->wherePivot('id_visiteur', $idVisiteur)->first();

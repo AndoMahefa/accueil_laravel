@@ -5,7 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Ticket extends Model {
+class Ticket extends Model
+{
     use HasFactory;
 
     protected $table = 'ticket';
@@ -13,12 +14,14 @@ class Ticket extends Model {
         'temps_estime',
         'id_service',
         'id_visiteur',
-        'date'
+        'date',
+        'heure_prevu'
     ];
 
     public $timestamps = false;
 
-    public function visiteur() {
+    public function visiteur()
+    {
         return $this->belongsTo(Visiteur::class, 'id_visiteur');
     }
 }
