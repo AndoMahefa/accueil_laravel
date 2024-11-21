@@ -137,12 +137,12 @@ class ServiceController extends Controller
     {
         // Valider les données reçues
         $donnees = $request->validate([
-            'temps_estime' => 'required|regex:/^\d{2}:\d{2}/', // Validation du champ temps_estime
+            'temps_estime' => 'required|regex:/^\d{2}:\d{2}/', // Format HH:mm
             'id_service' => 'required|exists:service,id',
             'id_visiteur' => 'required|exists:visiteur,id'
         ]);
 
-        // Récupérer le service et le visiteur en utilisant les modèles Eloquent
+        // Récupérer le service et le visiteur
         $service = $this->serviceManager->findById($donnees['id_service']);
         $visiteur = $this->visiteurService->findById($donnees['id_visiteur']);
 
@@ -157,12 +157,29 @@ class ServiceController extends Controller
             return response()->json(['message' => 'Le visiteur n\'est pas associé à ce service'], 404);
         }
 
+        // Récupérer le dernier ticket pour ce service
+        $dernierTicket = $service->tickets()
+            ->orderBy('date', 'desc')
+            ->latest('temps_estime') // Dernier temps estimé
+            ->first();
+
+        // Calculer le nouveau temps estimé
+        $nouveauTempsEstime = Carbon::parse($donnees['temps_estime']);
+
+        if ($dernierTicket) {
+            $dernierTemps = Carbon::parse($dernierTicket->temps_estime);
+            $nouveauTempsEstime->addMinutes($dernierTemps->hour * 60 + $dernierTemps->minute);
+        }
+
+        // Formatage en HH:mm
+        $donnees['temps_estime'] = $nouveauTempsEstime->format('H:i');
+
         // Mettre à jour le statut dans la table pivot
         $service->visiteurs()->updateExistingPivot($donnees['id_visiteur'], [
-            'statut' => 1, // Met le statut à "accepté"
+            'statut' => 1, // Statut accepté
         ]);
 
-        // Créer le ticket avec les détails nécessaires
+        // Créer le ticket
         $ticketData = [
             'temps_estime' => $donnees['temps_estime'],
             'id_service' => $donnees['id_service'],
@@ -172,12 +189,46 @@ class ServiceController extends Controller
 
         $ticket = $this->ticketService->create($ticketData);
 
-        // Retourner la réponse avec le ticket généré
+        // Retourner la réponse
         return response()->json([
             'message' => 'Ticket généré et statut du visiteur mis à jour avec succès.',
             'ticket' => $ticket,
             'visiteur' => $visiteur,
             'service' => $service
         ], 200);
+    }
+
+
+    public function refuserDemande(Request $request) {
+        $donnees = $request->validate([
+            'id_visiteur' => 'required|exists:visiteur,id',
+            'id_service' => 'required|exists:service,id'
+        ]);
+
+        $idService = $donnees['id_service'];
+        $service = $this->serviceManager->findById($idService);
+        $idVisiteur = $donnees['id_visiteur'];
+        $visiteur = $this->visiteurService->findById($idVisiteur);
+
+        if (!$service || !$visiteur) {
+            return response()->json(['message' => 'Service ou Visiteur non trouvé'], 404);    
+        }
+
+        $pivot = $service->visiteurs()->wherePivot('id_visiteur', $idVisiteur)->first();
+
+        if (!$pivot) {
+            return response()->json(['message' => 'Le visiteur n\'est pas associé à ce service'], 404);
+        }
+
+        // Mettre à jour le statut dans la table pivot
+        $service->visiteurs()->updateExistingPivot($idVisiteur, [
+            'statut' => 2, // Met le statut à "accepté"
+        ]);
+
+        return response()->json([
+            'message' => 'Demande refuse',
+            'visiteur' => $visiteur,
+            'service' => $service
+        ], 204);
     }
 }

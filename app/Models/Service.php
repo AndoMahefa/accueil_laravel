@@ -31,4 +31,8 @@ class Service extends Authenticatable {
         return $this->belongsToMany(Visiteur::class, 'visiteur_service', 'id_service', 'id_visiteur')
             ->withPivot('motif_visite', 'statut', 'date_heure_arrivee');
     }
+
+    public function tickets() {
+        return $this->hasMany(Ticket::class, 'id_service');
+    }
 }

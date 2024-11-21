@@ -29,6 +29,7 @@ Route::middleware(['auth:sanctum', 'check.token.expiration'])->group(function(){
     Route::middleware('role:Ressources humaine|Directeur General|Daf')->group(function(){
         Route::get('services/{id}/demandes', [ServiceController::class, 'demandeVisiteursParService']);
         Route::post('/service/generer-ticket', [ServiceController::class, 'genererTicket']);
+        Route::post('/service/refuser-demande', [ServiceController::class, 'refuserDemande']);
     });
     Route::middleware('role:Ressources humaine')->group(function(){
 
