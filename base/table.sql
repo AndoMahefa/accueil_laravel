@@ -19,7 +19,7 @@ create table if not exists visiteur(
 );
 
 create table if not exists visiteur_service(
-    motif_visite varchar(50),
+    motif_visite text,
     statut int not null,
     date_heure_arrivee timestamp not null,
 
@@ -36,6 +36,7 @@ create table if not exists visiteur_service(
 create table if not exists ticket(
     id serial primary key,
     temps_estime time not null,
+    date date,
 
     id_service int references service(id),
     id_visiteur int references visiteur(id)
