@@ -12,8 +12,13 @@ class Ticket extends Model {
     protected $fillable = [
         'temps_estime',
         'id_service',
-        'id_visiteur'
+        'id_visiteur',
+        'date'
     ];
 
     public $timestamps = false;
+
+    public function visiteur() {
+        return $this->belongsTo(Visiteur::class, 'id_visiteur');
+    }
 }

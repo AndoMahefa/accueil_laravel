@@ -154,6 +154,7 @@ class ServiceController extends Controller {
             'temps_estime' => $donnees['temps_estime'],
             'id_service' => $donnees['id_service'],
             'id_visiteur' => $donnees['id_visiteur'],
+            'date' => Carbon::now()
         ];
     
         $ticket = $this->ticketService->create($ticketData);

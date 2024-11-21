@@ -15,12 +15,15 @@ class Visiteur extends Model {
         "prenom",
         "cin",
         "email",
-        "telephone",
-        "date_heure_arrivee"
+        "telephone"
     ];
 
     public function services() {
         return $this->belongsToMany(Service::class, 'visiteur_service', 'id_visiteur', 'id_service')
         ->withPivot('motif_visite', 'statut','date_heure_arrivee');
+    }
+
+    public function tickets() {
+        return $this->hasMany(Ticket::class, 'id_visiteur');
     }
 }
