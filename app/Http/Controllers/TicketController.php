@@ -45,7 +45,7 @@ class TicketController extends Controller
         $tickets = Ticket::with('visiteur')
             ->whereDate('date', $today)
             ->where('id_service', $idService)
-            ->orderBy('temps_estime', 'asc')
+            ->orderBy('heure_prevu', 'asc')
             ->get();
 
         return response()->json($tickets);

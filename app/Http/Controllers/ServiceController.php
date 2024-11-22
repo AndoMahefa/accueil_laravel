@@ -166,14 +166,18 @@ class ServiceController extends Controller
         Log::info("Heure validation initial : " . $heureValidation);
         Log::info("Temps estime" . $donnees['temps_estime']);
         $tempsEstime = Carbon::createFromFormat('H:i', $donnees['temps_estime']);
-        $dernierTicketHeurePrevu = Carbon::createFromFormat('H:i', substr($dernierTicket->heure_prevu, 0, 5));
-        Log::info($dernierTicketHeurePrevu);
-        $dernierTicketTempsEstime = Carbon::createFromFormat('H:i', substr($dernierTicket->temps_estime, 0, 5));
         if ($dernierTicket) {
+            $dernierTicketHeurePrevu = Carbon::createFromFormat('H:i', substr($dernierTicket->heure_prevu, 0, 5));
+            $dernierTicketTempsEstime = Carbon::createFromFormat('H:i', substr($dernierTicket->temps_estime, 0, 5));
+            Log::info($dernierTicketHeurePrevu);
             Log::info("Heure prevu du dernier ticket: " . $dernierTicket->heure_prevu);
-            $heurePrevue = $dernierTicketHeurePrevu
-                ->addMinutes($dernierTicketTempsEstime->hour * 60 + $dernierTicketTempsEstime->minute)
-                ->addMinutes($tempsEstime->hour * 60 + $tempsEstime->minute);
+            if ($dernierTicketHeurePrevu > $heureValidation) {
+                $heurePrevue = $dernierTicketHeurePrevu
+                    ->addMinutes($tempsEstime->hour * 60 + $tempsEstime->minute);
+                $tempsEstime = $dernierTicketTempsEstime->addMinutes($tempsEstime->hour * 60 + $tempsEstime->minute);
+            } else {
+                $heurePrevue = $heureValidation->copy()->addMinutes($tempsEstime->hour * 60 + $tempsEstime->minute);
+            }
             Log::info("Heure prevu apres calcul: " . $heurePrevue);
         } else {
             $heurePrevue = $heureValidation->copy()->addMinutes($tempsEstime->hour * 60 + $tempsEstime->minute);
@@ -187,7 +191,7 @@ class ServiceController extends Controller
 
         // // Créer le ticket avec les détails nécessaires
         $ticketData = [
-            'temps_estime' => $donnees['temps_estime'],
+            'temps_estime' => $tempsEstime,
             'id_service' => $donnees['id_service'],
             'id_visiteur' => $donnees['id_visiteur'],
             'date' => $heureValidation->toDateString(),
@@ -204,9 +208,6 @@ class ServiceController extends Controller
             'service' => $service
         ], 200);
     }
-
-
-
 
     public function refuserDemande(Request $request)
     {
