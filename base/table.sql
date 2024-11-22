@@ -38,6 +38,7 @@ create table if not exists ticket(
     temps_estime time not null,
     date date,
     heure_prevu time,
+    heure_validation time,
 
     id_service int references service(id),
     id_visiteur int references visiteur(id)

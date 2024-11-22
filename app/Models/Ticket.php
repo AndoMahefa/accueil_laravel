@@ -15,7 +15,8 @@ class Ticket extends Model
         'id_service',
         'id_visiteur',
         'date',
-        'heure_prevu'
+        'heure_prevu',
+        'heure_validation'
     ];
 
     public $timestamps = false;

@@ -196,6 +196,7 @@ class ServiceController extends Controller
             'id_visiteur' => $donnees['id_visiteur'],
             'date' => $heureValidation->toDateString(),
             'heure_prevu' => $heurePrevue->toTimeString(),
+            'heure_validation' => $heureValidation
         ];
 
         $ticket = $this->ticketService->create($ticketData);
@@ -203,7 +204,7 @@ class ServiceController extends Controller
         // Retourner la réponse avec le ticket généré
         return response()->json([
             'message' => 'Ticket généré et statut du visiteur mis à jour avec succès.',
-            // 'ticket' => $ticket,
+            'ticket' => $ticket,
             'visiteur' => $visiteur,
             'service' => $service
         ], 200);
