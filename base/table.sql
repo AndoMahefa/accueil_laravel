@@ -23,14 +23,15 @@ create table if not exists visiteur_service(
     statut int not null,
     date_heure_arrivee timestamp not null,
 
+    -- id_demande serial primary key,
+
     id_service int references service(id),
     id_visiteur int references visiteur(id)
 );
 
--- create table if not exists demande_visiteur_service(
---     id_visiteur int references visiteur(id),
---     id_service int references service(id),
---     statut int not null
+-- create table if not exists demande_fichier(
+--     id_demande int references visiteur_service(id_demande),
+--     fichier varchar(255) not null
 -- );
 
 create table if not exists ticket(
@@ -47,6 +48,7 @@ create table if not exists ticket(
 create table if not exists rdv(
     id serial primary key,
     date_heure timestamp not null,
+    motif text,
 
     id_service int references service(id),
     id_visiteur int references visiteur(id)

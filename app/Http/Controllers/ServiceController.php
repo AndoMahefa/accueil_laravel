@@ -6,6 +6,7 @@ use App\Services\ServiceManager;
 use App\Services\TicketService;
 use App\Services\VisiteurService;
 use Carbon\Carbon;
+use App\Models\Service;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
@@ -25,6 +26,13 @@ class ServiceController extends Controller
     public function index($idService)
     {
         return response()->json($this->serviceManager->findAll($idService));
+    }
+
+    public function findAll() {
+        $services = Service::all();
+        return response()->json([
+            'services' => $services
+        ]);
     }
 
     public function donnees_valide(Request $request, $isUpdate = false, $id = null)
@@ -163,8 +171,8 @@ class ServiceController extends Controller
 
         // Calculer l'heure prévue pour le nouveau ticket
         $heureValidation = Carbon::now(); // Heure actuelle
-        Log::info("Heure validation initial : " . $heureValidation);
-        Log::info("Temps estime" . $donnees['temps_estime']);
+        Log::info("Heure validation initial: " . $heureValidation);
+        Log::info("Temps estime: " . $donnees['temps_estime']);
         $tempsEstime = Carbon::createFromFormat('H:i', $donnees['temps_estime']);
         if ($dernierTicket) {
             $dernierTicketHeurePrevu = Carbon::createFromFormat('H:i', substr($dernierTicket->heure_prevu, 0, 5));

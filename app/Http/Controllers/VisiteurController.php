@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Services\VisiteurService;
+use App\Models\Visiteur;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class VisiteurController extends Controller {
     protected VisiteurService $visiteurService;
@@ -57,4 +59,24 @@ class VisiteurController extends Controller {
 
         return response()->json(null, 204);
     }
+
+    public function search(Request $request)
+    {
+        $searchKey = $request->query('search');
+        if (!$searchKey) {
+            return response()->json([], 400);
+        }
+        Log::info($searchKey);
+
+        $visitor = Visiteur::where('email', $searchKey)
+            ->orWhere('cin', $searchKey)
+            ->first();
+
+        if ($visitor) {
+            return response()->json($visitor);
+        } else {
+            return response()->json([], 404);
+        }
+    }
+
 }
