@@ -53,3 +53,23 @@ create table if not exists rdv(
     id_service int references service(id),
     id_visiteur int references visiteur(id)
 );
+
+create table jour(
+    id serial primary key,
+    nom varchar(20) not null
+);
+
+insert into jour values 
+    (default, 'Lundi'),
+    (default, 'Mardi'),
+    (default, 'Mercredi'),
+    (default, 'Jeudi'),
+    (default, 'Vendredi');
+
+create table if not exists creneau_service(
+    id serial primary key,
+    heure time not null,
+
+    jour int references jour(id),
+    id_service int references service(id)
+);

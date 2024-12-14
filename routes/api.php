@@ -5,6 +5,7 @@ use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\TicketController;
 use App\Http\Controllers\VisiteurController;
 use App\Http\Controllers\RendezVousController;
+use App\Http\Controllers\CreneauServiceController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -32,6 +33,9 @@ Route::middleware(['auth:sanctum', 'check.token.expiration'])->group(function ()
         Route::post('/service/generer-ticket', [ServiceController::class, 'genererTicket']);
         Route::post('/service/refuser-demande', [ServiceController::class, 'refuserDemande']);
         Route::post('/service/file-d\'attente', [TicketController::class, 'ticketsLeJourJ']);
+        Route::post('/service/creneaux-register', [CreneauServiceController::class, 'store']);
+        Route::get('/service/creneaux/{idService}', [CreneauServiceController::class, 'findAllService']);
+        Route::delete('/service/delete-creneaux/{id}', [CreneauServiceController::class, 'destroy']);
     });
     Route::middleware('role:Ressource Humaine')->group(function () {});
     Route::middleware('role:Directeur General')->group(function () {
@@ -40,9 +44,11 @@ Route::middleware(['auth:sanctum', 'check.token.expiration'])->group(function ()
     Route::middleware('role:Daf')->group(function () {});
 });
 
+// Route pour login et enregistrement service
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/service/register', [ServiceController::class, 'store']);
 
+// Route pour rendez-vous
 Route::post('/rendez-vous/register', [RendezVousController::class, 'store']);
 Route::get('/visiteur/search', [VisiteurController::class, 'search']);
 Route::get('/services', [ServiceController::class, 'findAll']);

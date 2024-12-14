@@ -6,6 +6,7 @@ use App\Services\ServiceManager;
 use App\Services\TicketService;
 use App\Services\VisiteurService;
 use App\Services\RendezVousService;
+use App\Services\CreneauServiceManager;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -28,6 +29,10 @@ class AppServiceProvider extends ServiceProvider
 
         $this->app->singleton(RendezVousService::class, function ($app) {
             return new RendezVousService();
+        });
+
+        $this->app->singleton(CreneauServiceManager::class, function($app) {
+            return new CreneauServiceManager();
         });
     }
 
