@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Services\CreneauServiceManager;
 use App\Models\CreneauService;
+use Illuminate\Support\Facades\Log;
 
 class CreneauServiceController extends Controller
 {
@@ -43,8 +44,13 @@ class CreneauServiceController extends Controller
         return response()->json(['message' => 'Créneaux ajoutés avec succès.'], 201);
     }
 
-    public function destroy($idJour) {
-        $this->creneauServiceManager->delete($idJour);
+    public function destroy($idService, $idJour, Request $request) {
+        $donnees = $request->validate([
+            'periodes' => 'required|array',
+        ]);
+        Log::info("idJour: " . $idJour . " idService: " . $idService);
+        Log::info($donnees['periodes']);
+        $this->creneauServiceManager->delete($idService, $idJour, $donnees['periodes']);
         return response()->json(['message' => 'Créneau supprimé avec succès.']);
     }
 }
