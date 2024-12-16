@@ -11,7 +11,7 @@ class CreneauServiceManager {
     }
 
     public function findAllService($idService) {
-        return CreneauService::where('id', '!=', $idService)
+        return CreneauService::where('id_service', $idService)
             ->orderBy('jour')
             ->orderBy('heure')
             ->get();
@@ -49,17 +49,25 @@ class CreneauServiceManager {
                 $subQuery->orWhere('heure', '>', '12:00:00');
             }
         });
-    
-        // $donnees = $query->get();
-        // foreach ($donnees as $donnee) {
-        //     Log::info($donnee);
-        //     $donnee->delete();
-        // }
+        
         // Supprime les créneaux correspondant aux conditions
         $query->delete();
         Log::info($query->toRawSql());
     
         return response()->json(['message' => 'Créneaux supprimés avec succès'], 200);
     }
-    
+ 
+    public function jourDispoService($idService) {
+        return CreneauService::select('jour')
+            ->distinct()
+            ->where('id_service', $idService)
+            ->get();
+    }
+
+    public function getCreneauxServiceJour($idService, $dayOfWeek) {
+        return CreneauService::select('id', 'heure', 'jour')
+            ->where('id_service', $idService)
+            ->where('jour', $dayOfWeek)
+            ->get();
+    }    
 }

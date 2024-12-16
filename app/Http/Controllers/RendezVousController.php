@@ -5,13 +5,16 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Services\RendezVousService;
 use App\Models\RendezVous;
+use App\Services\CreneauServiceManager;
 
 class RendezVousController extends Controller
 {
     protected RendezVousService $rendezVousService;
-    public function __construct(RendezVousService $rendezVousService)
+    protected CreneauServiceManager $creneauService;
+    public function __construct(RendezVousService $rendezVousService, CreneauServiceManager $creneauService)
     {
         $this->rendezVousService = $rendezVousService;
+        $this->creneauService = $creneauService;
     }
 
     public function index() {
@@ -47,5 +50,15 @@ class RendezVousController extends Controller
             });
     
         return response()->json($indisponibilites);
+    }
+
+    public function jourDispoService($idService) {
+        $jourDispo = $this->creneauService->jourDispoService($idService);
+        return response()->json(['joursDispo'=> $jourDispo]);
+    }
+
+    public function findCreneauxServiceJour($idService, $day) {
+        $creneaux = $this->creneauService->getCreneauxServiceJour($idService, $day);
+        return response()->json(['creneaux' => $creneaux]);
     }
 }
