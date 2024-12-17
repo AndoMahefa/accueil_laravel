@@ -41,14 +41,14 @@ class RendezVousController extends Controller
             'date' => 'required|date',
             'id_service' => 'required|integer|exists:service,id',
         ]);
-    
+
         $indisponibilites = RendezVous::whereDate('date_heure', $validated['date'])
             ->where('id_service', $validated['id_service'])
             ->pluck('date_heure')
             ->map(function ($dateTime) {
                 return date('H:i', strtotime($dateTime));
             });
-    
+
         return response()->json($indisponibilites);
     }
 
@@ -60,5 +60,14 @@ class RendezVousController extends Controller
     public function findCreneauxServiceJour($idService, $day) {
         $creneaux = $this->creneauService->getCreneauxServiceJour($idService, $day);
         return response()->json(['creneaux' => $creneaux]);
+    }
+
+    public function findRdvByService($idService, Request $request) {
+        $date = $request->query('date');
+        $date = $date ?? now()->toDateString();
+
+        $rdvs = $this->rendezVousService->findRdvByService($idService, $date);
+
+        return response()->json(["rdv" => $rdvs]);
     }
 }

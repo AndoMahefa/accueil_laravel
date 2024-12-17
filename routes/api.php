@@ -38,6 +38,7 @@ Route::middleware(['auth:sanctum', 'check.token.expiration'])->group(function ()
         Route::delete('/service/{idService}/delete-creneaux/{id}', [CreneauServiceController::class, 'destroy']);
         Route::get('/service/{idService}/jours-disponible', [RendezVousController::class, 'jourDispoService']);
         Route::get('/service/{idService}/creneaux/{dayOfWeek}', [RendezVousController::class, 'findCreneauxServiceJour']);
+        Route::get('/service/{idService}/rendez-vous', [RendezVousController::class, 'findRdvByService']);
     });
     Route::middleware('role:Ressource Humaine')->group(function () {});
     Route::middleware('role:Directeur General')->group(function () {

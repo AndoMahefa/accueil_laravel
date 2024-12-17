@@ -73,3 +73,30 @@ create table if not exists creneau_service(
     jour int references jour(id),
     id_service int references service(id)
 );
+
+create table if not exists appel_offre(
+    id serial primary key,
+    titre varchar(255) not null,
+    description text not null,
+    date_lancement date not null,
+    date_limite date not null,
+    budget_estime numeric(10,2),
+    status int not null
+);
+
+create table if not exists actionaire(
+    id serial primary key,
+    nom varchar(100),
+    email varchar(50) not null,
+    mot_de_passe varchar(255) not null
+);
+
+create table if not exists soumission(
+    id serial primary key,
+    montant_propose numeric(10,2) not null,
+    description text,
+    status int not null,
+
+    id_soumissionaire int references actionaire(id),
+    id_appel_offre int references appel_offre(id)
+);
