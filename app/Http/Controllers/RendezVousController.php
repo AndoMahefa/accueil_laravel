@@ -7,12 +7,11 @@ use App\Services\RendezVousService;
 use App\Models\RendezVous;
 use App\Services\CreneauServiceManager;
 
-class RendezVousController extends Controller
-{
+class RendezVousController extends Controller {
     protected RendezVousService $rendezVousService;
     protected CreneauServiceManager $creneauService;
-    public function __construct(RendezVousService $rendezVousService, CreneauServiceManager $creneauService)
-    {
+    
+    public function __construct(RendezVousService $rendezVousService, CreneauServiceManager $creneauService) {
         $this->rendezVousService = $rendezVousService;
         $this->creneauService = $creneauService;
     }

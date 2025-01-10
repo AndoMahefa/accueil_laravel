@@ -72,6 +72,7 @@ class Kernel extends HttpKernel
 
     protected $routeMiddleware = [
         'role' => \App\Http\Middleware\RoleMiddleware::class,
-        'check.token.expiration' => \App\Http\Middleware\CheckTokenExpiration::class
+        'check.token.expiration' => \App\Http\Middleware\CheckTokenExpiration::class,
+        'verify-role' => \App\Http\Middleware\VerifyRoleMiddleware::class
     ];
 }

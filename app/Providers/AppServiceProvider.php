@@ -8,6 +8,9 @@ use App\Services\VisiteurService;
 use App\Services\RendezVousService;
 use App\Services\CreneauServiceManager;
 use App\Services\AppelOffreService;
+use App\Services\AppelOffreChampsService;
+use App\Services\EmployeService;
+use App\Services\UserService;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -38,6 +41,18 @@ class AppServiceProvider extends ServiceProvider
 
         $this->app->singleton(AppelOffreService::class, function($app) {
             return new AppelOffreService();
+        });
+
+        $this->app->singleton(AppelOffreChampsService::class, function($app) {
+            return new AppelOffreChampsService();
+        });
+
+        $this->app->singleton(EmployeService::class, function($app) {
+            return new EmployeService();
+        });
+
+        $this->app->singleton(UserService::class, function($app) {
+            return new UserService();
         });
     }
 

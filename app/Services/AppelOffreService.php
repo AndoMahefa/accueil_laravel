@@ -10,8 +10,28 @@ class AppelOffreService {
         return AppelOffre::create($data);
     }
 
-    public function findAll() {
-        return AppelOffre::paginate(6);
+    public function findAll($status) {
+        $this->updateAppelExpire();
+
+        return AppelOffre::where('status', $status)
+            ->paginate(6);
+    }
+
+    public function getAppelOuvert() {
+        $this->updateAppelExpire();
+
+        return AppelOffre::where('status', 0)
+            ->where('date_limite', '>=', now())
+            ->paginate(6);
+    }
+
+    public function updateAppelExpire() {
+        return AppelOffre::where('date_limite', '<', now())
+            ->update(['status' => 1]);
+    }
+
+    public function updateAppelSoumis() {
+        return AppelOffre::update(['status' => 2]);
     }
 
     public function findById($id) {

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\RoleService;
 use App\Services\ServiceManager;
 use App\Services\TicketService;
 use App\Services\VisiteurService;
@@ -23,8 +24,7 @@ class ServiceController extends Controller
         $this->ticketService = $ticketService;
     }
 
-    public function index($idService)
-    {
+    public function index($idService) {
         return response()->json($this->serviceManager->findAll($idService));
     }
 
@@ -35,54 +35,28 @@ class ServiceController extends Controller
         ]);
     }
 
-    public function donnees_valide(Request $request, $isUpdate = false, $id = null)
-    {
-        // Si c'est une mise à jour, certains champs peuvent être `nullable`
-        $rules = [
-            'nom' => 'required|string|max:50',
-            'email' => [
-                'required',
-                'string',
-                'email',
-                // La règle unique doit ignorer l'ID actuel lors de la mise à jour
-                'unique:service,email,' . ($isUpdate ? $id : 'NULL')
-            ],
-            'telephone' => 'required|string|regex:/^[0-9]+$/|max:50',
-        ];
+    public function store(Request $request) {
+        $validated = $request->validate([
+            'nom' => "required|string|max:100"
+        ]);
 
-        // Ajout conditionnel de la règle pour le mot de passe (non requis pour update)
-        if (!$isUpdate) {
-            $rules['mot_de_passe'] = 'required|string|min:8';
-        } else {
-            $rules['mot_de_passe'] = 'nullable|string|min:8'; // Permet la mise à jour sans changer le mot de passe
-        }
-
-        return $request->validate($rules);
-    }
-
-    public function store(Request $request)
-    {
-        $donnees = $this->donnees_valide($request); // Validation pour la création
-
-        // Hachage du mot de passe avant enregistrement
-        $donnees['mot_de_passe'] = bcrypt($donnees['mot_de_passe']);
-
-        $service = $this->serviceManager->create($donnees);
+        $service = $this->serviceManager->create($validated);
         return response()->json($service, 201);
     }
 
     public function update(Request $request, $id)
     {
-        $donnees = $this->donnees_valide($request, true, $id); // Validation pour la mise à jour
+        $validated = $request->validate([
+            'nom' => 'required|string|max:100'
+        ]);
+        // // Si un mot de passe est fourni, on le hache ; sinon, on l'ignore
+        // if (!empty($donnees['mot_de_passe'])) {
+        //     $donnees['mot_de_passe'] = bcrypt($donnees['mot_de_passe']);
+        // } else {
+        //     unset($donnees['mot_de_passe']);
+        // }
 
-        // Si un mot de passe est fourni, on le hache ; sinon, on l'ignore
-        if (!empty($donnees['mot_de_passe'])) {
-            $donnees['mot_de_passe'] = bcrypt($donnees['mot_de_passe']);
-        } else {
-            unset($donnees['mot_de_passe']);
-        }
-
-        $service = $this->serviceManager->update($id, $donnees);
+        $service = $this->serviceManager->update($id, $validated);
         return response()->json($service);
     }
 
@@ -250,5 +224,31 @@ class ServiceController extends Controller
             'visiteur' => $visiteur,
             'service' => $service
         ], 204);
+    }
+
+    public function assignRoleToService(Request $request) {
+        // Validation des données de la requête
+        $validated = $request->validate([
+            'role' => 'required|string|max:100', // Vérifie le rôle
+            'id_service' => 'required|int|exists:service,id'
+        ]);
+
+        // Vérification si le rôle existe déjà pour ce service
+        $existingRole = RoleService::where('id_service', $validated['id_service'])
+            ->where('role', $validated['role'])
+            ->first();
+
+        if ($existingRole) {
+            // Si le rôle existe déjà pour ce service, retourner une réponse avec une erreur
+            return response()->json(['message' => 'Ce rôle est déjà attribué à ce service'], 400);
+        }
+
+        // Créer un nouveau rôle pour ce service
+        $roleService = new RoleService();
+        $roleService->id_service = $validated['id_service'];
+        $roleService->role = $validated['role'];
+        $roleService->save();
+
+        return response()->json(['message' => 'Rôle attribué au service avec succès'], 200);
     }
 }
