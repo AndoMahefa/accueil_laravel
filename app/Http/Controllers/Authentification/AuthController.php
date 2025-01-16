@@ -62,6 +62,7 @@ class AuthController extends Controller {
 
         // Si l'utilisateur est un employé, récupérer son service et ses rôles
         $employeInfo = null;
+        $idService = 0;
         if ($user->id_employe && $user->role === 'user') {
             $employe = Employe::with(['service', 'roles'])->find($user->id_employe);
 
@@ -77,6 +78,9 @@ class AuthController extends Controller {
                 Log::info('Rôles extraits:', [
                     'roles' => $rolesEmploye
                 ]);
+                Log::info(json_encode($employe->service));
+                $idService = $employe->service->id;
+
                 $employeInfo = [
                     'nom' => $employe->nom,
                     'prenom' => $employe->prenom,
@@ -86,6 +90,7 @@ class AuthController extends Controller {
             }
         } else if($user->id_employe && $user->role == 'admin') {
             $emp = Employe::with('service')->find($user->id_employe);
+            $idService = $emp->service->id;
             $employeInfo = [
                 'nom' => $emp->nom,
                 'prenom' => $emp->prenom,
@@ -97,6 +102,7 @@ class AuthController extends Controller {
         return response()->json([
             'message' => 'Connexion réussie',
             'token' => $token,
+            'idService' => $idService,
             'user' => [
                 'id' => $user->id,
                 'email' => $user->email,
