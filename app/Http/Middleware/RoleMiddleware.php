@@ -10,18 +10,26 @@ class RoleMiddleware
 {
     public function handle(Request $request, Closure $next, ...$roles)
     {
-        $service = Auth::guard('sanctum')->user(); // Récupère l'utilisateur authentifié en tant que service
+        $user = Auth::guard('sanctum')->user(); // Récupère l'utilisateur authentifié en tant que service
 
+        Log::info('utilisateur: ' . $user);
         // Vérifiez si le service a un rôle parmi ceux autorisés
+        $employe = $user->employe;
+        $service = null;
+        if($employe) {
+            $service = $employe->service;
+        }
+
+        Log::info('employe: ' . $employe->nom);
         if ($service) {
-            Log::info('Rôle actuel : ' . $service->nom);
+            Log::info('Service actuel : ' . $service->nom);
             if ($service && in_array($service->nom, explode('|', implode(',', $roles)))) {
                 return $next($request);
-            }            
+            }
         }
-        Log::warning('Accès refusé pour le rôle : ' . ($service->nom ?? 'Aucun'));
-        return response()->json(['message' => 'Accès non autorisé'], 403);
-        
+
+        Log::warning('Accès refusé : ' . ($service->nom ?? 'Aucun'));
+        return response()->json(["message" => "Aucun service associé à cet utilisateur"], 403);
     }
 }
 
