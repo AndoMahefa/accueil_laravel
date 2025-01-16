@@ -11,7 +11,7 @@ class ServiceManager {
 
     public function findAll($idService) {
         return Service::where('id', '!=', $idService)->get();
-    }    
+    }
 
     public function findById($id) {
         return Service::findOrFail($id);
@@ -26,6 +26,5 @@ class ServiceManager {
     public function delete($id) {
         $service = $this->findById($id);
         $service->delete();
-        return $service;
     }
 }

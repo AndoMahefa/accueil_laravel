@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
+
 // use Illuminate\Foundation\Auth\User as Authenticatable;
 // use Illuminate\Notifications\Notifiable;
 // use Laravel\Sanctum\HasApiTokens;
@@ -39,13 +41,15 @@ use Illuminate\Database\Eloquent\Model;
 // }
 
 class Service extends Model{
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected $table = 'service';
     public $timestamps = false;
     protected $fillable = [
         'nom'
     ];
+
+    protected $dates = ['deleted_at'];
 
     public function visiteurs() {
         return $this->belongsToMany(Visiteur::class, 'visiteur_service', 'id_service', 'id_visiteur')

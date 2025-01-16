@@ -19,7 +19,8 @@ insert into service values
 
 create table if not exists service(
     id serial primary key,
-    nom varchar(100) not null
+    nom varchar(100) not null,
+    deleted_at date
 );
 
 create table if not exists role_service(
@@ -165,7 +166,8 @@ create table if not exists reference_ppm(
 create table if not exists appel_offre_table(
     id serial primary key,
     appel_offre varchar(100),
-    id_reference int references reference_ppm(id)
+    id_reference int references reference_ppm(id),
+    deleted_at date
 );
 
 create table if not exists appel_offre_champs(

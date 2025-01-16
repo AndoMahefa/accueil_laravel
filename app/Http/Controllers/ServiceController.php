@@ -69,8 +69,35 @@ class ServiceController extends Controller
     public function destroy($id)
     {
         $this->serviceManager->delete($id);
-        return response()->json(null, 204);
+        return response()->json(['message'=>'service supprime avec succes'], 204);
     }
+
+    public function getDeletedServices()
+    {
+        $deletedServices = Service::onlyTrashed()->get();
+
+        return response()->json([
+            'message' => 'Services supprimés récupérés avec succès',
+            'services' => $deletedServices
+        ]);
+    }
+    
+    public function restore($id)
+    {
+        $service = Service::withTrashed()->find($id);
+
+        if (!$service) {
+            return response()->json(['message' => 'Service introuvable'], 404);
+        }
+
+        if ($service->trashed()) {
+            $service->restore();
+            return response()->json(['message' => 'Service restauré avec succès']);
+        }
+
+        return response()->json(['message' => 'Ce service n\'était pas supprimé']);
+    }
+
 
     public function associeVisiteur(Request $request)
     {
