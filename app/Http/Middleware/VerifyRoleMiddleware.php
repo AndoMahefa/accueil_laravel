@@ -3,6 +3,7 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
 
 class VerifyRoleMiddleware
@@ -31,23 +32,21 @@ class VerifyRoleMiddleware
 
         // Vérifier si l'utilisateur est associé à un employé
         $employe = $user->employe;
-
         if (!$employe) {
             return response()->json(['message' => 'Aucun employé associé à cet utilisateur'], Response::HTTP_FORBIDDEN);
         }
 
         // Récupérer les rôles de l'employé via la relation
         $employeRoles = $employe->roles()->pluck('role')->toArray();
-
+        Log::info('role(s) employe: ' . json_encode($employeRoles));
+        Log::info('roles api.php: ' . json_encode($roles));
         // Vérifier si l'employé possède au moins un des rôles requis
         if (!array_intersect($roles, $employeRoles)) {
-            return response()->json(['message' => 'Accès interdit'], Response::HTTP_FORBIDDEN);
-        }
-
-        // Restriction par service : vérifier si l'employé accède uniquement à son service
-        $serviceIdFromRequest = $request->route('service_id'); // Récupère l'ID du service depuis la route ou la requête
-        if ($serviceIdFromRequest && $employe->id_service != $serviceIdFromRequest) {
-            return response()->json(['message' => 'Accès interdit : Vous ne pouvez accéder qu\'à votre service'], Response::HTTP_FORBIDDEN);
+            return response()->json([
+                'message' => 'Accès interdit',
+                'required_roles' => $roles,
+                'user_roles' => $employeRoles
+            ], Response::HTTP_FORBIDDEN);
         }
 
         return $next($request);
