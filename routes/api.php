@@ -44,6 +44,7 @@ Route::middleware(['auth:sanctum', 'check.token.expiration'])->group(function() 
 
         // Attribuer un role a un service
         Route::post('/service/role', [ServiceController::class, 'assignRoleToService']);
+        Route::get('/service/{idService}/roles', [ServiceController::class, 'getRolesByService']);
 
 
         // Route pour crud employe
@@ -51,12 +52,16 @@ Route::middleware(['auth:sanctum', 'check.token.expiration'])->group(function() 
         Route::post('/employe', [EmployeController::class, 'store']);
         Route::put('/employe/{idEmp}/update', [EmployeController::class, 'update']);
         Route::delete('/employe/{idEmp}/delete', [EmployeController::class, 'destroy']);
+        Route::get('/employes/deleted', [EmployeController::class, 'getDeletedEmployes']);
+        Route::post('/employes/{id}/restore', [EmployeController::class, 'restore']);
 
         // Creation utilisateur pour un employe
         Route::post('/employe/create-compte', [EmployeController::class, 'createUserForEmploye']);
 
         //Attribuer des roles a un employe
         Route::post('/employe/role', [EmployeController::class, 'assignRolesToEmployee']);
+        Route::delete('/employe/{idEmploye}/role/{idRole}', [EmployeController::class, 'deleteRoleEmploye']);
+        Route::get('/employe/{idEmploye}/roles', [EmployeController::class, 'getRolesByEmploye']);
 
 
         // Route pour le service accueil
