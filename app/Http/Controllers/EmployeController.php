@@ -1,6 +1,7 @@
 <?php
 namespace App\Http\Controllers;
 
+use App\Models\Employe;
 use App\Models\RoleEmploye;
 use App\Services\EmployeService;
 use App\Services\UserService;
@@ -16,7 +17,11 @@ class EmployeController extends Controller {
     }
 
     public function findAllByService($idService) {
-        $employes = $this->employeService->findAll($idService);
+        $employes = Employe::where('id_service', $idService)
+            ->with('roles')
+            ->with('utilisateur')
+            ->whereNull('deleted_at')
+            ->get();
 
         return response()->json([
             'message' => 'liste de tous les employes',
@@ -66,7 +71,35 @@ class EmployeController extends Controller {
     public function destroy($id) {
         $this->employeService->delete($id);
 
-        return response()->json(['message'=>'Employe supprime avec succes']);
+        return response()->json(['message'=>'Employe supprime avec succes'], 204);
+    }
+
+    public function getDeletedEmployes()
+    {
+        $deletedEmployes = Employe::onlyTrashed()
+            ->with('service')
+            ->paginate(10);
+
+        return response()->json([
+            'message' => 'Employes supprimés récupérés avec succès',
+            'employes' => $deletedEmployes
+        ]);
+    }
+
+    public function restore($id)
+    {
+        $service = Employe::withTrashed()->find($id);
+
+        if (!$service) {
+            return response()->json(['message' => 'Employe introuvable'], 404);
+        }
+
+        if ($service->trashed()) {
+            $service->restore();
+            return response()->json(['message' => 'Employe restauré avec succès']);
+        }
+
+        return response()->json(['message' => 'Cet employe n\'était pas supprimé']);
     }
 
     public function createUserForEmploye(Request $request) {
@@ -123,5 +156,23 @@ class EmployeController extends Controller {
             'added_roles' => $newRoles,
             'existing_roles' => $existingRoles,
         ], 201);
+    }
+
+    public function deleteRoleEmploye($idEmploye, $idRole) {
+        RoleEmploye::where('id_employe', $idEmploye)
+            ->where('id_role', $idRole)
+            ->delete();
+
+        return response()->json([
+            'message' => 'Role supprimé avec succès',
+        ], 204);
+    }
+
+    public function getRolesByEmploye($idEmploye) {
+        $roles = RoleEmploye::where('id_employe', $idEmploye)
+            ->with('roleService')
+            ->get();
+
+        return response()->json($roles);
     }
 }
