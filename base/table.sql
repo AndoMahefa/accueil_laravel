@@ -39,6 +39,7 @@ create table if not exists employe(
     cin varchar(25) unique not null,
     telephone varchar(25) unique not null,
     genre varchar(20) not null,
+    deleted_at date,
 
     id_service int references service(id)
 );
