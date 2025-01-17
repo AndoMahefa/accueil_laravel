@@ -4,10 +4,10 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Employe extends Model {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     public $timestamps = false;
     protected $table = "employe";
@@ -21,6 +21,8 @@ class Employe extends Model {
         'genre',
         'id_service'
     ];
+
+    protected $dates = ['deleted_at'];
 
     public function service() {
         return $this->belongsTo(Service::class, 'id_service');
