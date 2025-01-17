@@ -74,14 +74,14 @@ class ServiceController extends Controller
 
     public function getDeletedServices()
     {
-        $deletedServices = Service::onlyTrashed()->get();
+        $deletedServices = Service::onlyTrashed()->paginate(10);
 
         return response()->json([
             'message' => 'Services supprimés récupérés avec succès',
             'services' => $deletedServices
         ]);
     }
-    
+
     public function restore($id)
     {
         $service = Service::withTrashed()->find($id);
@@ -278,4 +278,11 @@ class ServiceController extends Controller
 
         return response()->json(['message' => 'Rôle attribué au service avec succès'], 200);
     }
+
+    public function getRolesByService($idService) {
+        $roles = RoleService::where('id_service', $idService)->get();
+
+        return response()->json(['roles'=> $roles]);
+    }
 }
+
