@@ -168,7 +168,10 @@ create table if not exists appel_offre_table(
     id serial primary key,
     appel_offre varchar(100),
     id_reference int references reference_ppm(id),
-    deleted_at date
+    deleted_at date,
+    date_publication date,
+    date_ouverture_plis date,
+    heure_limite time
 );
 
 create table if not exists appel_offre_champs(
@@ -184,4 +187,26 @@ create table if not exists appel_offre_donnees(
 
     id_appel_offre int references appel_offre_table(id),
     id_appel_offre_champs int references appel_offre_champs(id)
+);
+
+create table if not exists soumissionaire(
+    id serial primary key,
+    nom varchar(50) not null,
+    prenom varchar(255) not null,
+    entreprise varchar(255) not null,
+    nif_stat varchar(150) not null,
+    adresse_siege varchar(150) not null,
+    contact varchar(20) not null,
+    rcs varchar(30) not null,
+    fiscale varchar(30) not null
+);
+
+create table if not exists remise_offre(
+    id serial primary key,
+    date_remise date not null,
+    heure_remise time not null,
+    -- montant_propose numeric(10,2) not null,
+
+    id_soumissionaire int references soumissionaire(id),
+    id_appel_offre int references appel_offre_table(id)
 );

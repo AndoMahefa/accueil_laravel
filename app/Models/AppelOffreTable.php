@@ -15,7 +15,10 @@ class AppelOffreTable extends Model
     public $timestamps = false;
     protected $fillable = [
         'appel_offre',
-        'id_reference'
+        'id_reference',
+        'date_publication',
+        'date_ouverture_plis',
+        'heure_limite'
     ];
 
     protected $dates = ['deleted_at'];
@@ -29,4 +32,11 @@ class AppelOffreTable extends Model
         return $this->belongsTo(ReferencePpm::class, 'id_reference', 'id');
     }
 
+    /**
+     * Scope pour récupérer uniquement les appels d'offres publiés
+     */
+    public function scopePublies($query)
+    {
+        return $query->whereNotNull('date_publication');
+    }
 }

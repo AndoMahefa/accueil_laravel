@@ -9,7 +9,7 @@ class CheckTokenExpiration {
         if (!$request->user()) {
             return response()->json(['message' => 'Token expiré ou invalide.'], 401);
         }
-    
+
         return $next($request);
     }
 }

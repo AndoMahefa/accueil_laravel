@@ -8,28 +8,37 @@ use Illuminate\Support\Facades\Log;
 
 class RoleMiddleware
 {
-    public function handle(Request $request, Closure $next, ...$roles)
+    public function handle(Request $request, Closure $next, ...$services)
     {
-        $user = Auth::guard('sanctum')->user(); // Récupère l'utilisateur authentifié en tant que service
+        $user = Auth::guard('sanctum')->user();
+        Log::info('Token reçu:', [
+            'token' => $request->bearerToken(),
+            'user' => $user ? 'User trouvé' : 'User non trouvé'
+        ]);
+        if (!$user) {
+            return response()->json(['message' => 'Non authentifié'], 401);
+        }
 
-        Log::info('utilisateur: ' . $user);
-        // Vérifiez si le service a un rôle parmi ceux autorisés
         $employe = $user->employe;
-        $service = null;
-        if($employe) {
-            $service = $employe->service;
+        if (!$employe) {
+            return response()->json(['message' => 'Aucun employé associé'], 403);
         }
 
-        Log::info('employe: ' . $employe->nom);
-        if ($service) {
-            Log::info('Service actuel : ' . $service->nom);
-            if ($service && in_array($service->nom, explode('|', implode(',', $roles)))) {
-                return $next($request);
-            }
+        $service = $employe->service;
+        if (!$service) {
+            return response()->json(['message' => 'Aucun service associé'], 403);
         }
 
-        Log::warning('Accès refusé : ' . ($service->nom ?? 'Aucun'));
-        return response()->json(["message" => "Aucun service associé à cet utilisateur"], 403);
+        // Vérifie si le service de l'employé est dans la liste des services autorisés
+        if (in_array($service->nom, $services)) {
+            return $next($request);
+        }
+
+        return response()->json([
+            'message' => 'Service non autorisé',
+            'required_services' => $services,
+            'user_service' => $service->nom
+        ], 403);
     }
 }
 

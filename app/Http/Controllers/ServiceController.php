@@ -24,6 +24,13 @@ class ServiceController extends Controller
         $this->ticketService = $ticketService;
     }
 
+    public function getAllServicesExceptAccueil()
+    {
+        $services = Service::whereRaw('LOWER(nom) != ?', ['accueil'])->get();
+
+        return response()->json($services);
+    }
+
     public function index($idService) {
         return response()->json($this->serviceManager->findAll($idService));
     }

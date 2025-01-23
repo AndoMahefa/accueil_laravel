@@ -11,35 +11,6 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 
 class AuthController extends Controller {
-    // public function login(Request $request) {
-    //     // Validation des informations d'identification
-    //     $credentials = $request->validate([
-    //         'email' => 'required|string|email',
-    //         'mot_de_passe' => 'required|string'
-    //     ]);
-
-    //     // Recherche de l'utilisateur par email
-    //     $service = Service::where('email', $credentials['email'])->first();
-
-    //     // Vérification du mot de passe
-    //     if (!$service || !Hash::check($credentials['mot_de_passe'], $service->mot_de_passe)) {
-    //         return response()->json(['message' => 'Identifiants incorrects'], 401);
-    //     }
-
-    //     // Génération d'un token personnalisé basé sur le nom du service
-    //     // $tokenName = 'token-' . $service->nom;
-    //     // $token = $service->createToken($tokenName, ['*'], now()->addMinute(1440))->plainTextToken;
-    //     $token = $service->createToken("token", ['*'], now()->addMinute(1440))->plainTextToken;
-
-    //     return response()->json([
-    //         'message' => 'Connexion réussie',
-    //         'token' => $token,
-    //         'token_type' => 'Bearer',
-    //         'role' => $service->nom,
-    //         'idService' => $service->id
-    //     ], 200);
-    // }
-
     public function login(Request $request) {
         $request->validate([
             'email' => 'required|email',
@@ -69,9 +40,8 @@ class AuthController extends Controller {
             if ($employe) {
                 Log::info('Roles recuperes : ', ['roles' => $employe->roles]);
                 $rolesEmploye = $employe->roles->pluck('role')->all();
-                // foreach($employe->roles as $role) {
-                //     $rolesEmploye[] = $role->role;
-                // }
+
+
                 Log::info('Relations chargées:', [
                     'roles' => $employe->roles->toArray(),
                 ]);
