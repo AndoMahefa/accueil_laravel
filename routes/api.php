@@ -9,7 +9,10 @@ use App\Http\Controllers\RendezVousController;
 use App\Http\Controllers\CreneauServiceController;
 use App\Http\Controllers\AppelOffreController;
 use App\Http\Controllers\AppelOffreChampsController;
+use App\Http\Controllers\DirectionController;
 use App\Http\Controllers\EmployeController;
+use App\Http\Controllers\FonctionController;
+use App\Http\Controllers\ObservationController;
 use App\Http\Controllers\ReferencePpmController;
 use App\Http\Controllers\RemiseOffreController;
 use Illuminate\Support\Facades\Route;
@@ -29,6 +32,11 @@ use Illuminate\Support\Facades\Route;
 Route::post('/login', [AuthController::class, 'login']);
 
 // Route pour rediriger vers creation admin et creation admin
+Route::get('/fonctions/service/{idService}', [FonctionController::class, 'getFonctionsByService']);
+Route::get('/fonctions/direction/{idDirection}', [FonctionController::class, 'getFonctionsByDirection']);
+Route::get('/services/direction/{idDirection}', [ServiceController::class, 'getServicesByDirection']);
+Route::get('/observations', [ObservationController::class, 'getObservations']);
+Route::get('/directions', [DirectionController::class, 'getDirections']);
 Route::post('/admin/create', [AdminController::class, 'adminRegister']);
 // Route pour rendez-vous cote client donc sans authentification
 Route::post('/rendez-vous/register', [RendezVousController::class, 'store']);
@@ -47,6 +55,15 @@ Route::middleware(['auth:sanctum', 'check.token.expiration'])->group(function() 
     Route::get('service/{id}', [ServiceController::class, 'show']);
 
     Route::middleware('verify-role:admin')->prefix('admin')->group(function(){
+        // Route pour crud direction
+        Route::post('/direction/register', [DirectionController::class, 'store']);
+        Route::get('/directions', [DirectionController::class, 'getDirections']);
+        Route::put('/direction/{idDirection}/update', [DirectionController::class, 'update']);
+        Route::delete('/direction/{idDirection}/delete', [DirectionController::class, 'delete']);
+        // Route::get('/directions/deleted', [DirectionController::class, 'getDeletedDirections']);
+        // Route::post('/directions/{id}/restore', [DirectionController::class, 'restore']);
+
+
         // Route pour crud service
         Route::post('/service/register', [ServiceController::class, 'store']);
         Route::get('/services', [ServiceController::class, 'findAll']);
@@ -58,6 +75,20 @@ Route::middleware(['auth:sanctum', 'check.token.expiration'])->group(function() 
         // Attribuer un role a un service
         Route::post('/service/role', [ServiceController::class, 'assignRoleToService']);
         Route::get('/service/{idService}/roles', [ServiceController::class, 'getRolesByService']);
+
+
+        // Route pour crud observation
+        Route::post('/observation/register', [ObservationController::class, 'store']);
+        Route::get('/observations', [ObservationController::class, 'getObservations']);
+        Route::put('/observation/{idObservation}/update', [ObservationController::class, 'update']);
+        Route::delete('/observation/{idObservation}/delete', [ObservationController::class, 'delete']);
+
+
+        // Route pour crud fonction
+        Route::post('/fonction/register', [FonctionController::class, 'store']);
+        Route::get('/fonctions', [FonctionController::class, 'getFonctions']);
+        Route::put('/fonction/{idFonction}/update', [FonctionController::class, 'update']);
+        Route::delete('/fonction/{idFonction}/delete', [FonctionController::class, 'delete']);
 
 
         // Route pour crud employe
@@ -128,7 +159,7 @@ Route::middleware(['auth:sanctum', 'check.token.expiration'])->group(function() 
 
     Route::prefix('user')->group(function() {
         // Service Accueil avec ses rôles spécifiques
-        Route::middleware('service:Accueil')->prefix('accueil')->group(function() {
+        // Route::middleware('service:Accueil')->prefix('accueil')->group(function() {
             // Enregistrement visiteur
             Route::middleware('verify-role:Enregistrer un visiteur')->group(function() {
                 Route::post('/visiteur', [VisiteurController::class, 'store']);
@@ -161,9 +192,9 @@ Route::middleware(['auth:sanctum', 'check.token.expiration'])->group(function() 
 
             Route::get('/services/{idService}', [ServiceController::class, 'index']);
             Route::get('/services', [ServiceController::class, 'getAllServicesExceptAccueil']);
-        });
+        // });
 
-        Route::middleware('service:PRMP')->prefix('prmp')->group(function () {
+        // Route::middleware('service:PRMP')->prefix('prmp')->group(function () {
             // Tous les champs de appel d'offre
             Route::get('/appel-offre-champs', [AppelOffreChampsController::class, 'getFields']);
             Route::post('/ajout-champ', [AppelOffreChampsController::class, 'store']);
@@ -176,7 +207,7 @@ Route::middleware(['auth:sanctum', 'check.token.expiration'])->group(function() 
 
             Route::get('/references', [ReferencePpmController::class, 'index']);
             Route::post('/reference', [ReferencePpmController::class, 'store']);
-        });
+        // });
 
         // Route::middleware('service:Ressource Humaine|Directeur General|Daf|PRMP')->group(function () {
         // });

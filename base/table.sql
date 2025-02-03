@@ -1,25 +1,34 @@
 create database accueil;
 \c accueil
 
--- create table if not exists service(
---     id serial primary key,
---     nom varchar(50) not null,
---     email varchar(50) not null,
---     mot_de_passe varchar(255) not null,
---     telephone varchar(50) not null
--- );
+create table if not exists direction(
+    id serial primary key,
+    nom varchar(100) not null,
+    deleted_at date,
 
-insert into service values
-(default, 'service 1', 'service1@gmail.com', '12345678', '0334565328'),
-(default, 'Accueil', 'accueil@gmail.com', '12345678', '0331256485'),
-(default, 'Ressource Humaine', 'rh@gmail.com', '12345678', '0334565328'),
-(default, 'Directeur General', 'dg@gmail.com', '12345678', '0334565328'),
-(default, 'Daf', 'daf@gmail.com', '12345678', '0334565328'),
-(default, 'PRMP', 'prmp@gmail.com', '12345678', '0334565328');
+    id_parent_dir int references direction(id)
+);
 
 create table if not exists service(
     id serial primary key,
     nom varchar(100) not null,
+    deleted_at date,
+
+    id_direction int references direction(id)
+);
+
+create table if not exists fonction(
+    id serial primary key,
+    nom varchar(100) not null,
+    deleted_at date,
+
+    id_service int references service(id),
+    id_direction int references direction(id)
+);
+
+create table if not exists observation(
+    id serial primary key,
+    observation text not null,
     deleted_at date
 );
 
@@ -41,7 +50,10 @@ create table if not exists employe(
     genre varchar(20) not null,
     deleted_at date,
 
-    id_service int references service(id)
+    id_direction int references direction(id),
+    id_service int references service(id),
+    id_fonction int references fonction(id),
+    id_observation int references observation(id)
 );
 
 insert into employe values

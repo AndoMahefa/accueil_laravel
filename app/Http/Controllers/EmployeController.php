@@ -38,7 +38,10 @@ class EmployeController extends Controller {
             'cin' => 'required|string|max:25|unique:employe,cin',
             'telephone' => 'required|string|max:25|unique:employe,telephone',
             'genre' => 'required|string|max:20',
-            'id_service' => 'required|exists:service,id'
+            'id_fonction' => 'required|int|exists:fonction,id',
+            'id_direction' => 'required|int|exists:direction,id',
+            'id_observation' => 'required|int|exists:observation,id',
+            'id_service' => 'nullable|int|exists:service,id'
         ]);
 
         $employe = $this->employeService->create($validated);
@@ -58,6 +61,9 @@ class EmployeController extends Controller {
             'cin' => 'required|string|max:25|unique:employe,cin,' . $id,
             'telephone' => 'required|string|max:25|unique:employe,telephone,' . $id,
             'genre' => 'required|string|max:20',
+            'id_fonction' => 'required|exists:fonction,id',
+            'id_direction' => 'required|exists:direction,id',
+            'id_observation' => 'required|exists:observation,id',
             'id_service' => 'required|exists:service,id'
         ]);
 

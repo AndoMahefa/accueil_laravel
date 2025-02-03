@@ -19,7 +19,10 @@ class Employe extends Model {
         'cin',
         'telephone',
         'genre',
-        'id_service'
+        'id_service',
+        'id_direction',
+        'id_fonction',
+        'id_observation'
     ];
 
     protected $dates = ['deleted_at'];
@@ -34,5 +37,17 @@ class Employe extends Model {
 
     public function utilisateur() {
         return $this->hasOne(User::class, 'id_employe');
+    }
+
+    public function direction() {
+        return $this->belongsTo(Direction::class, 'id_direction');
+    }
+
+    public function fonction() {
+        return $this->belongsTo(Fonction::class, 'id_fonction');
+    }
+
+    public function observation() {
+        return $this->belongsTo(Observation::class, 'id_observation');
     }
 }

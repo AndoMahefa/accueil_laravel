@@ -44,7 +44,8 @@ class ServiceController extends Controller
 
     public function store(Request $request) {
         $validated = $request->validate([
-            'nom' => "required|string|max:100"
+            'nom' => 'required|string|max:100',
+            'id_direction' => 'required|exists:direction,id'
         ]);
 
         $service = $this->serviceManager->create($validated);
@@ -54,14 +55,9 @@ class ServiceController extends Controller
     public function update(Request $request, $id)
     {
         $validated = $request->validate([
-            'nom' => 'required|string|max:100'
+            'nom' => 'required|string|max:100',
+            'id_direction' => 'required|exists:direction,id'
         ]);
-        // // Si un mot de passe est fourni, on le hache ; sinon, on l'ignore
-        // if (!empty($donnees['mot_de_passe'])) {
-        //     $donnees['mot_de_passe'] = bcrypt($donnees['mot_de_passe']);
-        // } else {
-        //     unset($donnees['mot_de_passe']);
-        // }
 
         $service = $this->serviceManager->update($id, $validated);
         return response()->json($service);
@@ -290,6 +286,14 @@ class ServiceController extends Controller
         $roles = RoleService::where('id_service', $idService)->get();
 
         return response()->json(['roles'=> $roles]);
+    }
+
+    public function getServicesByDirection($idDirection) {
+        $services = Service::where('id_direction', $idDirection)->get();
+        return response()->json([
+            'status' => 'success',
+            'services' => $services
+        ]);
     }
 }
 
