@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Authentification;
 
 use App\Http\Controllers\Controller;
+use App\Models\Direction;
 use App\Models\Employe;
 use App\Models\Service;
 use App\Models\User;
@@ -33,11 +34,13 @@ class AuthController extends Controller {
 
         // Si l'utilisateur est un employé, récupérer son service et ses rôles
         $employeInfo = null;
+        $direction = null;
         $idService = 0;
         if ($user->id_employe && $user->role === 'user') {
             $employe = Employe::with(['service', 'roles'])->find($user->id_employe);
 
             if ($employe) {
+                $direction = Direction::findOrFail($employe->id_direction);
                 Log::info('Roles recuperes : ', ['roles' => $employe->roles]);
                 $rolesEmploye = $employe->roles->pluck('role')->all();
 
@@ -60,6 +63,7 @@ class AuthController extends Controller {
             }
         } else if($user->id_employe && $user->role == 'admin') {
             $emp = Employe::with('service')->find($user->id_employe);
+            $direction = Direction::findOrFail($emp->id_direction);
             $idService = $emp->service->id;
             $employeInfo = [
                 'nom' => $emp->nom,
@@ -73,6 +77,7 @@ class AuthController extends Controller {
             'message' => 'Connexion réussie',
             'token' => $token,
             'idService' => $idService,
+            'direction' => $direction,
             'user' => [
                 'id' => $user->id,
                 'email' => $user->email,

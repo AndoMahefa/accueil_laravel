@@ -8,7 +8,8 @@ use Illuminate\Support\Facades\Log;
 
 class RoleMiddleware
 {
-    public function handle(Request $request, Closure $next, ...$services)
+    // public function handle(Request $request, Closure $next, ...$services)
+    public function handle(Request $request, Closure $next, ...$directions)
     {
         $user = Auth::guard('sanctum')->user();
         Log::info('Token reçu:', [
@@ -24,20 +25,34 @@ class RoleMiddleware
             return response()->json(['message' => 'Aucun employé associé'], 403);
         }
 
-        $service = $employe->service;
-        if (!$service) {
-            return response()->json(['message' => 'Aucun service associé'], 403);
+        $direction = $employe->direction;
+        if(!$direction) {
+            return response()->json(['message' => 'Aucun direction associée'], 403);
         }
 
-        // Vérifie si le service de l'employé est dans la liste des services autorisés
-        if (in_array($service->nom, $services)) {
+        if(in_array($direction->nom, $directions)) {
             return $next($request);
         }
 
+        // $service = $employe->service;
+        // if (!$service) {
+        //     return response()->json(['message' => 'Aucun service associé'], 403);
+        // }
+
+        // // Vérifie si le service de l'employé est dans la liste des services autorisés
+        // if (in_array($service->nom, $services)) {
+        //     return $next($request);
+        // }
+
+        // return response()->json([
+        //     'message' => 'Service non autorisé',
+        //     'required_services' => $services,
+        //     'user_service' => $service->nom
+        // ], 403);
         return response()->json([
-            'message' => 'Service non autorisé',
-            'required_services' => $services,
-            'user_service' => $service->nom
+            'message' => 'Direction non autorisé',
+            'required_direction' => $directions,
+            'user_direction' => $direction->nom
         ], 403);
     }
 }

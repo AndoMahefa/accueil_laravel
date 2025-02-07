@@ -26,17 +26,26 @@ class CreneauServiceController extends Controller
         ]);
     }
 
+    public function findAllDirection($idDirection) {
+        $creneaux = CreneauService::where('id_direction', $idDirection)->get();
+        return response()->json([
+            'creneaux' => $creneaux,
+        ]);
+    }
+
     public function store(Request $request) {
         $donnees = $request->validate([
             'jour' => 'required|int',
             'creneaux' => 'required|array',
-            'id_service' => 'required|exists:service,id',
+            'id_direction' => 'required|int|exists:direction,id',
+            'id_service' => 'nullable|int|exists:service,id',
         ]);
 
         foreach ($donnees['creneaux'] as $creneau) {
             CreneauService::create([
                 'jour' => $donnees['jour'],
                 'heure' => $creneau,
+                'id_direction' => $donnees['id_direction'],
                 'id_service' => $donnees['id_service'],
             ]);
         }

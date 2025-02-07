@@ -20,4 +20,9 @@ class Direction extends Model {
     public function services() {
         return $this->hasMany(Service::class, 'id_direction');
     }
+
+    public function visiteurs() {
+        return $this->belongsToMany(Visiteur::class, 'visiteur_service', 'id_direction', 'id_visiteur')
+            ->withPivot('motif_visite', 'statut', 'date_heure_arrivee', 'id_service', 'id_fonction');
+    }
 }

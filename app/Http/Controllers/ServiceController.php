@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Direction;
 use App\Models\RoleService;
 use App\Services\ServiceManager;
 use App\Services\TicketService;
@@ -105,23 +106,35 @@ class ServiceController extends Controller
     public function associeVisiteur(Request $request)
     {
         $donnees = $request->validate([
-            'id_visiteur' => 'required|exists:visiteur,id',
-            'id_service' => 'required|exists:service,id',
+            'id_visiteur' => 'required|int|exists:visiteur,id',
+            'id_direction' => 'required|int|exists:direction,id',
+            'id_service' => 'nullable|int|exists:service,id',
+            'id_fonction' => 'required|int|exists:fonction,id',
             'motif_visite' => 'required|string'
         ]);
 
+        // Vérifiez si 'id_service' est présent dans les données
+        if (!array_key_exists('id_service', $donnees)) {
+            $donnees['id_service'] = null; // Ou gérez cela comme vous le souhaitez
+        }
+
         $visiteur = $this->visiteurService->findById($donnees['id_visiteur']);
-        $service = $this->serviceManager->findById($donnees['id_service']);
 
         $donnees['date_heure_arrivee'] = Carbon::now();
         $donnees['statut'] = 0;
-        $service->visiteurs()->attach($visiteur->id, ['motif_visite' => $donnees['motif_visite'], 'statut' => $donnees['statut'], 'date_heure_arrivee' => $donnees['date_heure_arrivee']]);
+
+        $motif_visite = $donnees['motif_visite'];
+        $statut = $donnees['statut'];
+
+        $direction = Direction::findOrFail($donnees['id_direction']);
+        $direction->visiteurs()->attach($visiteur->id, ['motif_visite' => $motif_visite, 'statut' => $statut, 'date_heure_arrivee' => $donnees['date_heure_arrivee'], 'id_service' => $donnees['id_service'], 'id_fonction'=>$donnees['id_fonction']]);
 
         return response()->json([
             'message' => 'Visiteur associé au service avec succès.',
             'visiteur' => $visiteur,
-            'service' => $service,
+            'direction' => $direction
         ], 201);
+        return response()->json($donnees);
     }
 
     public function demandeVisiteursParService($idService)
@@ -151,27 +164,34 @@ class ServiceController extends Controller
         // Valider les données reçues
         $donnees = $request->validate([
             'temps_estime' => 'required|regex:/^\d{2}:\d{2}/', // Validation du champ temps_estime
-            'id_service' => 'required|exists:service,id',
+            'id_direction' => 'required|int|exists:direction,id',
+            // 'id_service' => 'nullable|int|exists:service,id',
             'id_visiteur' => 'required|exists:visiteur,id'
         ]);
 
         // Récupérer le service et le visiteur
-        $service = $this->serviceManager->findById($donnees['id_service']);
+        $direction = Direction::findOrFail($donnees['id_direction']);
+        // $service = $this->serviceManager->findById($donnees['id_service']);
         $visiteur = $this->visiteurService->findById($donnees['id_visiteur']);
 
-        if (!$service || !$visiteur) {
-            return response()->json(['message' => 'Service ou Visiteur non trouvé'], 404);
+        // if (!$service || !$visiteur) {
+        //     return response()->json(['message' => 'Service ou Visiteur non trouvé'], 404);
+        // }
+
+        if (!$direction || !$visiteur) {
+            return response()->json(['message' => 'Direction ou Visiteur non trouvé'], 404);
         }
 
         // Vérifier si le visiteur est déjà associé au service
-        $pivot = $service->visiteurs()->wherePivot('id_visiteur', $donnees['id_visiteur'])->first();
+        // $pivot = $service->visiteurs()->wherePivot('id_visiteur', $donnees['id_visiteur'])->first();
+        $pivot = $direction->visiteurs()->wherePivot('id_visiteur', $donnees['id_visiteur'])->first();
 
         if (!$pivot) {
             return response()->json(['message' => 'Le visiteur n\'est pas associé à ce service'], 404);
         }
 
         // Récupérer le dernier ticket généré pour ce service
-        $dernierTicket = $this->ticketService->getLastTicketForService($donnees['id_service']);
+        $dernierTicket = $this->ticketService->getLastTicketForService($donnees['id_direction']);
 
         // Calculer l'heure prévue pour le nouveau ticket
         $heureValidation = Carbon::now(); // Heure actuelle
@@ -197,14 +217,17 @@ class ServiceController extends Controller
         }
 
         // Mettre à jour le statut dans la table pivot
-        $service->visiteurs()->updateExistingPivot($donnees['id_visiteur'], [
+        // $service->visiteurs()->updateExistingPivot($donnees['id_visiteur'], [
+        //     'statut' => 1, // Met le statut à "accepté"
+        // ]);
+        $direction->visiteurs()->updateExistingPivot($donnees['id_visiteur'], [
             'statut' => 1, // Met le statut à "accepté"
         ]);
 
         // // Créer le ticket avec les détails nécessaires
         $ticketData = [
             'temps_estime' => $tempsEstime,
-            'id_service' => $donnees['id_service'],
+            'id_direction' => $donnees['id_direction'],
             'id_visiteur' => $donnees['id_visiteur'],
             'date' => $heureValidation->toDateString(),
             'heure_prevu' => $heurePrevue->toTimeString(),
@@ -214,11 +237,17 @@ class ServiceController extends Controller
         $ticket = $this->ticketService->create($ticketData);
 
         // Retourner la réponse avec le ticket généré
+        // return response()->json([
+        //     'message' => 'Ticket généré et statut du visiteur mis à jour avec succès.',
+        //     'ticket' => $ticket,
+        //     'visiteur' => $visiteur,
+        //     'service' => $service
+        // ], 200);
         return response()->json([
             'message' => 'Ticket généré et statut du visiteur mis à jour avec succès.',
             'ticket' => $ticket,
             'visiteur' => $visiteur,
-            'service' => $service
+            'direction' => $direction
         ], 200);
     }
 

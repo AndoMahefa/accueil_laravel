@@ -7,6 +7,7 @@ use App\Services\EmployeService;
 use App\Services\UserService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 
 class EmployeController extends Controller {
     protected EmployeService $employeService;
@@ -16,15 +17,51 @@ class EmployeController extends Controller {
         $this->userService = $userService;
     }
 
-    public function findAllByService($idService) {
-        $employes = Employe::where('id_service', $idService)
+    public function findEmployes() {
+        $query = Employe::query()
+            ->with('roles')
+            ->with('utilisateur')
+            ->with('direction')
+            ->with('service')
+            ->whereNull('deleted_at');
+
+        $employes = $query->paginate(10);
+
+        return response()->json([
+            'message' => 'liste des employes',
+            'employes' => $employes
+        ]);
+    }
+
+    public function findEmployesByService($idService) {
+        Log::info("id service : " . $idService);
+        $query = Employe::query()
+            ->with('roles')
+            ->with('utilisateur')
+            ->with('direction')
+            ->with('service')
+            ->whereNull('deleted_at')
+            ->where('id_service', $idService);
+
+        $employes = $query->paginate(10);
+
+        return response()->json([
+            'message' => 'liste des employes',
+            'employes' => $employes
+        ]);
+    }
+
+    public function findEmployesByDirection($idDirection) {
+        $query = Employe::query()
             ->with('roles')
             ->with('utilisateur')
             ->whereNull('deleted_at')
-            ->get();
+            ->where('id_direction', $idDirection);
+
+        $employes = $query->paginate(10);
 
         return response()->json([
-            'message' => 'liste de tous les employes',
+            'message' => 'liste des employes',
             'employes' => $employes
         ]);
     }
@@ -64,7 +101,7 @@ class EmployeController extends Controller {
             'id_fonction' => 'required|exists:fonction,id',
             'id_direction' => 'required|exists:direction,id',
             'id_observation' => 'required|exists:observation,id',
-            'id_service' => 'required|exists:service,id'
+            'id_service' => 'nullable|exists:service,id'
         ]);
 
         $emp = $this->employeService->update($id, $validated);

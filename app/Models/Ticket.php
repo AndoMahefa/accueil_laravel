@@ -12,6 +12,7 @@ class Ticket extends Model
     protected $table = 'ticket';
     protected $fillable = [
         'temps_estime',
+        'id_direction',
         'id_service',
         'id_visiteur',
         'date',

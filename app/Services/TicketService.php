@@ -37,9 +37,9 @@ class TicketService
         return $ticket;
     }
 
-    public function getLastTicketForService($idService)
+    public function getLastTicketForService($idDirection)
     {
-        return Ticket::where('id_service', $idService)
+        return Ticket::where('id_direction', $idDirection)
             ->orderBy('heure_prevu', 'desc') // Trier par heure prévue décroissante
             ->first(); // Récupérer le dernier ticket
     }

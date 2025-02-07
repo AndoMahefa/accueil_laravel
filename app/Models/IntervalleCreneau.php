@@ -5,15 +5,14 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class CreneauService extends Model
+class IntervalleCreneau extends Model
 {
     use HasFactory;
-    protected $table = "creneau_service";
+    protected $table = 'intervalle_creneaux';
     public $timestamps = false;
     protected $fillable = [
-        'jour',
-        'heure',
-        'id_service',
-        'id_direction'
+        'intervalle',
+        'id_direction',
+        'id_service'
     ];
 }

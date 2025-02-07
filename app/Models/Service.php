@@ -17,10 +17,10 @@ class Service extends Model{
 
     protected $dates = ['deleted_at'];
 
-    public function visiteurs() {
-        return $this->belongsToMany(Visiteur::class, 'visiteur_service', 'id_service', 'id_visiteur')
-            ->withPivot('motif_visite', 'statut', 'date_heure_arrivee');
-    }
+    // public function visiteurs() {
+    //     return $this->belongsToMany(Visiteur::class, 'visiteur_service', 'id_service', 'id_visiteur')
+    //         ->withPivot('motif_visite', 'statut', 'date_heure_arrivee');
+    // }
 
     public function direction() {
         return $this->belongsTo(Direction::class, 'id_direction');

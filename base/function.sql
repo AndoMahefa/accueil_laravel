@@ -24,6 +24,19 @@ end
 $$ language plpgsql;
 
 
+CREATE OR REPLACE FUNCTION insert_jour()
+RETURNS VOID AS $$
+BEGIN
+    insert into jour values
+        (default, 'Lundi'),
+        (default, 'Mardi'),
+        (default, 'Mercredi'),
+        (default, 'Jeudi'),
+        (default, 'Vendredi');
+END
+$$ LANGUAGE plpgsql;
+
+
 CREATE OR REPLACE FUNCTION insert_specifique_role_service()
 RETURNS VOID AS $$
 BEGIN
