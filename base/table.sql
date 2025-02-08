@@ -110,6 +110,7 @@ create table if not exists rdv(
     date_heure timestamp not null,
     motif text,
 
+    id_direction int references direction(id),
     id_service int references service(id),
     id_visiteur int references visiteur(id)
 );

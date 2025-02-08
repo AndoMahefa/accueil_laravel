@@ -46,8 +46,11 @@ Route::post('/visiteur', [VisiteurController::class, 'store']);
 Route::get('/services', [ServiceController::class, 'findAll']);
 Route::get('/services/except-accueil', [ServiceController::class, 'getAllServicesExceptAccueil']);
 Route::get('/service/{idService}/jours-disponible', [RendezVousController::class, 'jourDispoService']);
+Route::get('/direction/{idDirection}/jours-disponible', [RendezVousController::class, 'jourDispoDirection']);
 Route::get('/service/{idService}/creneaux/{dayOfWeek}', [RendezVousController::class, 'findCreneauxServiceJour']);
-Route::get('/rdv/heure-indisponible', [RendezVousController::class, 'findHeureIndispo']);
+Route::get('/direction/{idDirection}/creneaux/{dayOfWeek}', [RendezVousController::class, 'findCreneauxDirectionJour']);
+Route::get('/rdv/heure-indisponible/service', [RendezVousController::class, 'findHeureIndispo']);
+Route::get('/rdv/heure-indisponible/direction', [RendezVousController::class, 'findHeureIndispoByDirection']);
 
 Route::get('service/{id}', [ServiceController::class, 'show']);
 
@@ -138,7 +141,8 @@ Route::middleware(['auth:sanctum', 'check.token.expiration'])->group(function() 
         Route::post('/service/creneaux-register', [CreneauServiceController::class, 'store']);
         Route::get('/service/{idService}/creneaux', [CreneauServiceController::class, 'findAllService']);
         Route::get('/direction/{idDirection}/creneaux', [CreneauServiceController::class, 'findAllDirection']);
-        Route::delete('/service/{idService}/delete-creneaux/{id}', [CreneauServiceController::class, 'destroy']);
+        Route::delete('/service/{idService}/delete-creneaux/{id}', [CreneauServiceController::class, 'destroyByService']);
+        Route::delete('/direction/{idDirection}/delete-creneaux/{id}', [CreneauServiceController::class, 'destroyByDirection']);
         Route::get('/service/{idService}/jours-disponible', [RendezVousController::class, 'jourDispoService']);
         Route::get('/service/{idService}/creneaux/{dayOfWeek}', [RendezVousController::class, 'findCreneauxServiceJour']);
         Route::get('/service/{idService}/rendez-vous', [RendezVousController::class, 'findRdvByService']);

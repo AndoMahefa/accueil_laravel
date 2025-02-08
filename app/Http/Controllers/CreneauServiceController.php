@@ -53,13 +53,23 @@ class CreneauServiceController extends Controller
         return response()->json(['message' => 'Créneaux ajoutés avec succès.'], 201);
     }
 
-    public function destroy($idService, $idJour, Request $request) {
+    public function destroyByService($idService, $idJour, Request $request) {
         $donnees = $request->validate([
             'periodes' => 'required|array',
         ]);
         Log::info("idJour: " . $idJour . " idService: " . $idService);
         Log::info($donnees['periodes']);
         $this->creneauServiceManager->delete($idService, $idJour, $donnees['periodes']);
+        return response()->json(['message' => 'Créneau supprimé avec succès.']);
+    }
+
+    public function destroyByDirection($idDirection, $idJour, Request $request) {
+        $donnees = $request->validate([
+            'periodes' => 'required|array',
+        ]);
+        Log::info("idJour: " . $idJour . " idDirection: " . $idDirection);
+        Log::info($donnees['periodes']);
+        $this->creneauServiceManager->deleteByDirection($idDirection, $idJour, $donnees['periodes']);
         return response()->json(['message' => 'Créneau supprimé avec succès.']);
     }
 }

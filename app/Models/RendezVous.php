@@ -14,7 +14,8 @@ class RendezVous extends Model
         'date_heure',
         'id_service',
         'id_visiteur',
-        'motif'
+        'motif',
+        'id_direction'
     ];
 
     public $timestamps = false;
