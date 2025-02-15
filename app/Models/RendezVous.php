@@ -12,6 +12,7 @@ class RendezVous extends Model
     protected $table = "rdv";
     protected $fillable = [
         'date_heure',
+        'heure_fin',
         'id_service',
         'id_visiteur',
         'motif',
@@ -28,5 +29,9 @@ class RendezVous extends Model
     public function visiteur()
     {
         return $this->belongsTo(Visiteur::class, 'id_visiteur');
+    }
+
+    public function direction() {
+        return $this->belongsTo(Direction::class, 'id_direction');
     }
 }

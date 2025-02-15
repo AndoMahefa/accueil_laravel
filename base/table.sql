@@ -130,6 +130,7 @@ insert into jour values
 create table if not exists creneau_service(
     id serial primary key,
     heure time not null,
+    heure_fin time not null,
     jour int references jour(id),
 
     id_direction int references direction(id),

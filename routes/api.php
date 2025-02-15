@@ -52,6 +52,9 @@ Route::get('/direction/{idDirection}/creneaux/{dayOfWeek}', [RendezVousControlle
 Route::get('/rdv/heure-indisponible/service', [RendezVousController::class, 'findHeureIndispo']);
 Route::get('/rdv/heure-indisponible/direction', [RendezVousController::class, 'findHeureIndispoByDirection']);
 
+Route::get('direction/{idDirection}/intervalle', [IntervalleCreneauController::class, 'findByDirection']);
+Route::get('service/{idService}/intervalle', [IntervalleCreneauController::class, 'findByService']);
+
 Route::get('service/{id}', [ServiceController::class, 'show']);
 
 // Route pour appel d'offre cote client donc sans authentification
@@ -146,6 +149,7 @@ Route::middleware(['auth:sanctum', 'check.token.expiration'])->group(function() 
         Route::get('/service/{idService}/jours-disponible', [RendezVousController::class, 'jourDispoService']);
         Route::get('/service/{idService}/creneaux/{dayOfWeek}', [RendezVousController::class, 'findCreneauxServiceJour']);
         Route::get('/service/{idService}/rendez-vous', [RendezVousController::class, 'findRdvByService']);
+        Route::get('/rendez-vous', [RendezVousController::class, 'index']);
 
 
         // Route pour le service PRMP

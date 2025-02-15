@@ -98,14 +98,14 @@ class CreneauServiceManager {
     }
 
     public function getCreneauxServiceJour($idService, $dayOfWeek) {
-        return CreneauService::select('id', 'heure', 'jour')
+        return CreneauService::select('id', 'heure', 'heure_fin', 'jour')
             ->where('id_service', $idService)
             ->where('jour', $dayOfWeek)
             ->get();
     }
 
     public function getCreneauxDirectionJour($idDirection, $dayOfWeek) {
-        return CreneauService::select('id', 'heure', 'jour')
+        return CreneauService::select('id', 'heure', 'heure_fin', 'jour')
             ->where('id_direction', $idDirection)
             ->where('jour', $dayOfWeek)
             ->get();

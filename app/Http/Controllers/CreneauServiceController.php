@@ -33,10 +33,32 @@ class CreneauServiceController extends Controller
         ]);
     }
 
+    // public function store(Request $request) {
+    //     $donnees = $request->validate([
+    //         'jour' => 'required|int',
+    //         'creneaux' => 'required|array',
+    //         'id_direction' => 'required|int|exists:direction,id',
+    //         'id_service' => 'nullable|int|exists:service,id',
+    //     ]);
+
+    //     foreach ($donnees['creneaux'] as $creneau) {
+    //         CreneauService::create([
+    //             'jour' => $donnees['jour'],
+    //             'heure' => $creneau,
+    //             'id_direction' => $donnees['id_direction'],
+    //             'id_service' => $donnees['id_service'],
+    //         ]);
+    //     }
+
+    //     return response()->json(['message' => 'Créneaux ajoutés avec succès.'], 201);
+    // }
+
     public function store(Request $request) {
         $donnees = $request->validate([
             'jour' => 'required|int',
             'creneaux' => 'required|array',
+            'creneaux.*.heure' => 'required|string',
+            'creneaux.*.heure_fin' => 'required|string',
             'id_direction' => 'required|int|exists:direction,id',
             'id_service' => 'nullable|int|exists:service,id',
         ]);
@@ -44,7 +66,8 @@ class CreneauServiceController extends Controller
         foreach ($donnees['creneaux'] as $creneau) {
             CreneauService::create([
                 'jour' => $donnees['jour'],
-                'heure' => $creneau,
+                'heure' => $creneau['heure'],
+                'heure_fin' => $creneau['heure_fin'],
                 'id_direction' => $donnees['id_direction'],
                 'id_service' => $donnees['id_service'],
             ]);

@@ -13,6 +13,7 @@ class CreneauService extends Model
     protected $fillable = [
         'jour',
         'heure',
+        'heure_fin',
         'id_service',
         'id_direction'
     ];

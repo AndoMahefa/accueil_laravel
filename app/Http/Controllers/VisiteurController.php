@@ -13,7 +13,7 @@ class VisiteurController extends Controller {
     public function __construct(VisiteurService $visiteurService) {
         $this->visiteurService = $visiteurService;
     }
-    
+
     public function index() {
         $visiteurs = $this->visiteurService->findAll();
 
@@ -32,7 +32,8 @@ class VisiteurController extends Controller {
             'prenom' => 'required|string|max:50',
             'cin' => 'required|string|max:20',
             'email' => 'required|string|max:50|email|unique:visiteur,email',
-            'telephone' => 'required|string|max:50|regex:/^[0-9]+$/'
+            'telephone' => 'required|string|max:50|regex:/^[0-9]+$/',
+            'genre' => 'required|string|max:20'
         ]);
 
         $visiteur = $this->visiteurService->create($donnees_valides);
@@ -46,11 +47,12 @@ class VisiteurController extends Controller {
             'prenom' => 'required|string|max:50',
             'cin' => 'required|string|max:20',
             'email' => 'required|string|max:50|email|unique:visiteur,email,'.$id,
-            'telephone' => 'required|string|max:50|regex:/^[0-9]+$/'
+            'telephone' => 'required|string|max:50|regex:/^[0-9]+$/',
+            'genre' => 'required|string|max:20'
         ]);
 
         $visiteur = $this->visiteurService->update($id, $donnees_valides);
-        
+
         return response()->json($visiteur);
     }
 

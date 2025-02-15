@@ -16,13 +16,32 @@ class RendezVousController extends Controller {
         $this->creneauService = $creneauService;
     }
 
-    public function index() {
-        return $this->rendezVousService->findAll();
+    // public function index() {
+    //     return $this->rendezVousService->findAll();
+    // }
+
+    public function index(Request $request) {
+        $date = $request->input('date');
+
+        $query = RendezVous::with('visiteur')
+            ->with('direction')
+            ->with('service');
+
+        if($date) {
+            $query->whereDate('date_heure', $date);
+        }
+
+        $rdv = $query->get();
+        return response()->json([
+            'message' => 'Tous les rdv',
+            'rdv' => $rdv
+        ]);
     }
 
     public function store(Request $request) {
         $donnees = $request->validate([
             'date_heure' => 'required|date|after:now',
+            'heure_fin' => 'required',
             'id_direction' => 'required|int|exists:direction,id',
             'id_service' => 'nullable|int|exists:service,id',
             'id_visiteur' => 'required|int|exists:visiteur,id',
