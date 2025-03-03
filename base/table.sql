@@ -56,8 +56,27 @@ create table if not exists employe(
     id_observation int references observation(id)
 );
 
-insert into employe values
-(default, 'RAZAFIMAHATRATRA', 'Ando', '2000-07-11', 'ITD 26 bis Ambaniala Itaosy', '0344773452', 'Homme', '7', );
+create table if not exists statut(
+    id serial primary key,
+    statut varchar(20) not null
+);
+
+insert into statut (statut) values
+('Présent'),
+('Absent'),
+('Retard'),
+('Congé');
+
+create table if not exists pointage(
+    id serial primary key,
+    date date not null default current_date,
+    heure_arrivee time not null,
+    heure_depart time,
+    session int not null,
+
+    id_employe int references employe(id),
+    id_statut int references statut(id)
+);
 
 create table if not exists role_employe(
     id_employe int references employe(id),
@@ -71,6 +90,34 @@ create table if not exists utilisateur(
     role varchar(50) not null,
 
     id_employe int references employe(id)
+);
+
+create table if not exists fonctionnalite(
+    id serial primary key,
+    -- nom varchar(255) not null,
+    titre varchar(255) not null,
+    vers varchar(100) not null,
+    icon varchar(75) not null,
+    statut int not null,
+
+    id_fonctionnalite int references fonctionnalite(id)
+);
+
+create table if not exists role_utilisateur(
+    id_fonctionnalite int references fonctionnalite(id),
+    id_utilisateur int references utilisateur(id)
+);
+
+create table if not exists actions(
+    id serial primary key,
+    nom varchar(100) not null,
+
+    id_fonctionnalite int references fonctionnalite(id)
+);
+
+create table if not exists utilisateur_action(
+    id_utilisateur int references utilisateur(id),
+    id_action int references actions(id)
 );
 
 create table if not exists visiteur(
@@ -145,39 +192,6 @@ create table if not exists intervalle_creneaux(
     id_service int references service(id)
 );
 
--- create table if not exists appel_offre(
---     id serial primary key,
---     titre varchar(255) not null,
---     description text not null,
---     date_lancement date not null,
---     date_limite date not null,
---     budget_estime numeric(10,2),
---     status int not null /* 0 ouvert, 1 ferme, 2 soumis */
--- );
-
--- create table if not exists actionaire(
---     id serial primary key,
---     nom varchar(100),
---     email varchar(50) not null,
---     mot_de_passe varchar(255) not null
--- );
-
---  insert into actionaire values
---  (default, 'Societe 1', 'societe1@gmail.com', '12345678'),
---  (default,),
---  ();
-
--- create table if not exists soumission(
---     id serial primary key,
---     montant_propose numeric(10,2) not null,
---     delai int,
---     description text not null,
---     status int not null,
-
---     id_soumissionaire int references actionaire(id),
---     id_appel_offre int references appel_offre(id)
--- );
-
 create table if not exists reference_ppm(
     id serial primary key,
     reference varchar(25) unique not null
@@ -229,3 +243,9 @@ create table if not exists remise_offre(
     id_soumissionaire int references soumissionaire(id),
     id_appel_offre int references appel_offre_table(id)
 );
+
+
+select *
+from role_utilisateur as ru
+    join fonctionnalite as f on ru.id_fonctionnalite = f.id
+where ru.id_utilisateur = 9 and f.id_fonctionnalite is null;

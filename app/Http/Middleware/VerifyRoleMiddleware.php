@@ -16,7 +16,7 @@ class VerifyRoleMiddleware
      * @param  mixed  ...$roles
      * @return mixed
      */
-    public function handle(Request $request, Closure $next, ...$roles)
+    public function handle(Request $request, Closure $next, $role)
     {
         // Récupérer l'utilisateur actuellement authentifié
         $user = auth()->user();
@@ -37,15 +37,15 @@ class VerifyRoleMiddleware
         }
 
         // Récupérer les rôles de l'employé via la relation
-        $employeRoles = $employe->roles()->pluck('role')->toArray();
-        Log::info('role(s) employe: ' . json_encode($employeRoles));
-        Log::info('roles api.php: ' . json_encode($roles));
+        // $employeRoles = $employe->roles()->pluck('role')->toArray();
+        // Log::info('role(s) employe: ' . json_encode($employeRoles));
+        // Log::info('roles api.php: ' . json_encode($roles));
         // Vérifier si l'employé possède au moins un des rôles requis
-        if (!array_intersect($roles, $employeRoles)) {
+        if ($role !== $user->role) {
             return response()->json([
                 'message' => 'Accès interdit',
-                'required_roles' => $roles,
-                'user_roles' => $employeRoles
+                'required_roles' => $role,
+                'role_user' => $user->role
             ], Response::HTTP_FORBIDDEN);
         }
 

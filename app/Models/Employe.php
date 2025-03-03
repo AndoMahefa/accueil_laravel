@@ -50,4 +50,10 @@ class Employe extends Model {
     public function observation() {
         return $this->belongsTo(Observation::class, 'id_observation');
     }
+
+    // Relation avec Pointage
+    public function pointages()
+    {
+        return $this->hasMany(Pointage::class, 'id_employe');
+    }
 }

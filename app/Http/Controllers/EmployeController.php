@@ -55,6 +55,8 @@ class EmployeController extends Controller {
         $query = Employe::query()
             ->with('roles')
             ->with('utilisateur')
+            ->with('direction')
+            ->with('service')
             ->whereNull('deleted_at')
             ->where('id_direction', $idDirection);
 

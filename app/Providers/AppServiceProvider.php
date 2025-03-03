@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Models\Pointage;
+use App\Observers\PointageObserver;
 use App\Services\ServiceManager;
 use App\Services\TicketService;
 use App\Services\VisiteurService;
@@ -10,6 +12,7 @@ use App\Services\CreneauServiceManager;
 use App\Services\AppelOffreService;
 use App\Services\AppelOffreChampsService;
 use App\Services\EmployeService;
+use App\Services\FonctionnaliteService;
 use App\Services\UserService;
 use Illuminate\Support\ServiceProvider;
 
@@ -54,6 +57,10 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(UserService::class, function($app) {
             return new UserService();
         });
+
+        $this->app->singleton(FonctionnaliteService::class, function() {
+            return new FonctionnaliteService();
+        });
     }
 
     /**
@@ -61,6 +68,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        Pointage::observe(PointageObserver::class);
     }
 }

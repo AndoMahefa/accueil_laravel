@@ -54,4 +54,9 @@ class User extends Authenticatable
     public function employe() {
         return $this->belongsTo(Employe::class, 'id_employe');
     }
+
+    // Dans le modèle Utilisateur
+    public function fonctionnalites() {
+        return $this->belongsToMany(Fonctionnalite::class, 'role_utilisateur', 'id_utilisateur', 'id_fonctionnalite');
+    }
 }
