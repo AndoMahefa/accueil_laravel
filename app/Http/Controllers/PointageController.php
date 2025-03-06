@@ -6,6 +6,7 @@ use App\Models\Pointage;
 use App\Models\Statut;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
+use Carbon\CarbonPeriod;
 use Illuminate\Support\Facades\Log;
 
 class PointageController extends Controller
@@ -87,10 +88,51 @@ class PointageController extends Controller
     }
 
     public function pointerConge(Request $request) {
+        // Validation des données
         $donnees = $request->validate([
-            'date_debut' => 'required',
-            'date_fin' => 'required'
+            'date_debut' => 'required|date',
+            'date_fin' => 'required|date|after_or_equal:date_debut',
+            'id_employe' => 'required|integer|exists:employe,id',
         ]);
+
+        // Récupération du statut "Congé"
+        $statutConge = Statut::where('statut', 'Congé')->first();
+        Log::info("Statut : " . $statutConge);
+        if (!$statutConge) {
+            return response()->json(['message' => 'Statut congé non configuré'], 400);
+        }
+
+        // Création de la période
+        $periode = CarbonPeriod::create(
+            Carbon::parse($donnees['date_debut']),
+            Carbon::parse($donnees['date_fin'])
+        );
+
+        $congesCrees = [];
+
+        foreach ($periode as $date) {
+            // Vérification des doublons
+            $existeDeja = Pointage::where([
+                'id_employe' => $donnees['id_employe'],
+                'date' => $date->format('Y-m-d'),
+            ])->exists();
+
+            if (!$existeDeja) {
+                $congesCrees[] = Pointage::create([
+                    'date' => $date,
+                    'heure_arrivee' => '00:00:00',
+                    'session' => 1,
+                    'id_employe' => $donnees['id_employe'],
+                    'id_statut' => $statutConge->id
+                ]);
+            }
+        }
+
+        return response()->json([
+            'message' => 'Congés enregistrés avec succès',
+            'jours_crees' => count($congesCrees),
+            'details' => $congesCrees
+        ], 201);
     }
 
     public function findAll(Request $request) {

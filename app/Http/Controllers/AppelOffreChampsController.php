@@ -21,6 +21,12 @@ class AppelOffreChampsController extends Controller
         return $this->appel->findall();
     }
 
+    public function deleteChamps($idChamp) {
+        $champ = $this->appel->delete($idChamp);
+
+        return response()->json(['message' => 'Champ supprimé avec succès']);
+    }
+
     public function store(Request $request) {
         $validated = $request->validate([
             'nom_champ' => 'required|string|max:100',
@@ -151,8 +157,7 @@ class AppelOffreChampsController extends Controller
         return response()->json($result);
     }
 
-    public function restore($id)
-    {
+    public function restore($id) {
         $appelOffre = AppelOffreTable::withTrashed()->find($id);
 
         if (!$appelOffre) {
@@ -201,8 +206,7 @@ class AppelOffreChampsController extends Controller
         return response()->json(['message' => 'Appel d\'offre supprimé avec succès'], 200);
     }
 
-    public function publierAppelOffre(Request $request, $id)
-    {
+    public function publierAppelOffre(Request $request, $id) {
         // Validation des données
         $validated = $request->validate([
             'date_ouverture_plis' => 'nullable|date',
@@ -226,8 +230,7 @@ class AppelOffreChampsController extends Controller
         return response()->json(['message' => 'Mise à jour effectuée avec succès', 'appel_offre' => $appelOffre], 200);
     }
 
-    public function getPublishedOffers()
-    {
+    public function getPublishedOffers() {
         $appelsOffres = AppelOffreTable::publies()
             ->orderBy('date_publication', 'desc')
             ->get();
@@ -238,8 +241,7 @@ class AppelOffreChampsController extends Controller
         ]);
     }
 
-    public function getSoumissionaire(Request $request)
-    {
+    public function getSoumissionaire(Request $request) {
         // Récupérer l'id_appel_offre depuis la requête
         $idAppelOffre = $request->input('id_appel_offre');
 

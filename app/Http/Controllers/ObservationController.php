@@ -10,7 +10,10 @@ class ObservationController extends Controller
 {
     public function getObservations() {
         Log::info(Observation::all());
-        return Observation::all();
+
+        $observations = Observation::all();
+        return response()
+            ->json($observations);
     }
 
     public function store(Request $request) {

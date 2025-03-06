@@ -19,9 +19,13 @@ class PointageObserver
     public function creating(Pointage $pointage)
     {
         try {
+            // Si le statut est déjà défini, on ne fait rien
+            if ($pointage->id_statut !== null) {
+                return;
+            }
              // Récupérer l'ID du statut "Retard"
             $statutRetard = Statut::where('statut', 'Retard')->first();
-            $statutPresent = Statut::where('statut', 'Present')->first();
+            $statutPresent = Statut::where('statut', 'Présent')->first();
 
             Log::info("statut : " . $statutRetard);
             Log::info("statut present : " . $statutPresent);

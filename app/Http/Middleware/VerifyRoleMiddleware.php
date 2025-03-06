@@ -36,11 +36,6 @@ class VerifyRoleMiddleware
             return response()->json(['message' => 'Aucun employé associé à cet utilisateur'], Response::HTTP_FORBIDDEN);
         }
 
-        // Récupérer les rôles de l'employé via la relation
-        // $employeRoles = $employe->roles()->pluck('role')->toArray();
-        // Log::info('role(s) employe: ' . json_encode($employeRoles));
-        // Log::info('roles api.php: ' . json_encode($roles));
-        // Vérifier si l'employé possède au moins un des rôles requis
         if ($role !== $user->role) {
             return response()->json([
                 'message' => 'Accès interdit',

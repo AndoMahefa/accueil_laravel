@@ -1,5 +1,17 @@
-create database accueil;
-\c accueil
+-- Pour que les accents et les caracteres speciaux s'affichent dans un projet windows, il faut faire ceci:
+-- Étape 1 : Activer UTF-8 dans les paramètres système
+-- Ouvrez Paramètres Windows > Heure et langue > Langue et région.
+
+-- Sous "Paramètres associés", cliquez sur Paramètres de langue administratifs.
+
+-- Dans l’onglet Administratif, cochez :
+
+-- "Utiliser Unicode UTF-8 pour prendre en charge les langues du monde entier".
+
+-- Redémarrez votre PC.
+
+create database accueil_project;
+\c accueil_project
 
 create table if not exists direction(
     id serial primary key,
@@ -65,7 +77,8 @@ insert into statut (statut) values
 ('Présent'),
 ('Absent'),
 ('Retard'),
-('Congé');
+('Congé'),
+('Permission');
 
 create table if not exists pointage(
     id serial primary key,

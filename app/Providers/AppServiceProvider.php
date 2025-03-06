@@ -14,10 +14,10 @@ use App\Services\AppelOffreChampsService;
 use App\Services\EmployeService;
 use App\Services\FonctionnaliteService;
 use App\Services\UserService;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\ServiceProvider;
 
-class AppServiceProvider extends ServiceProvider
-{
+class AppServiceProvider extends ServiceProvider {
     /**
      * Register any application services.
      */
@@ -66,8 +66,7 @@ class AppServiceProvider extends ServiceProvider
     /**
      * Bootstrap any application services.
      */
-    public function boot(): void
-    {
+    public function boot(): void {
         Pointage::observe(PointageObserver::class);
     }
 }

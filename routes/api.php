@@ -169,7 +169,7 @@ Route::middleware(['auth:sanctum', 'check.token.expiration'])->group(function() 
         Route::post('/prmp/ajout-champ', [AppelOffreChampsController::class, 'store']);
         Route::post('/prmp/appel-offre-donnees', [AppelOffreChampsController::class, 'saveDonneesChamps']);
         Route::put('/prmp/modif-champ-appel/{idChamp}', [AppelOffreChampsController::class, 'update']);
-        Route::delete('/prmp/delete-champ/{idChamp}', [AppelOffreChampsController::class, 'destroy']);
+        Route::delete('/prmp/delete-champ/{idChamp}', [AppelOffreChampsController::class, 'deleteChamps']);
         Route::get('/prmp/appels-offres', [AppelOffreChampsController::class, 'allAppels']);
         Route::get('/prmp/appels-offres/{id}', [AppelOffreChampsController::class, 'detailsAppel']);
         Route::delete('/prmp/appel-offre/{id}/delete', [AppelOffreChampsController::class, 'deleteAppelOffre']);
@@ -192,7 +192,8 @@ Route::middleware(['auth:sanctum', 'check.token.expiration'])->group(function() 
         Route::post('/pointage', [PointageController::class, 'pointerArrivee']);
         Route::post('/pointage/depart', [PointageController::class, 'pointerDepart']);
         Route::get('/pointages', [PointageController::class, 'findAll']);
-        Route::get('pointages/{idEmploye}', [PointageController::class, 'ficheByEmploye']);
+        Route::get('/pointages/{idEmploye}', [PointageController::class, 'ficheByEmploye']);
+        Route::post('pointer/conge', [PointageController::class, 'pointerConge']);
     });
 
     Route::middleware('verify-role:user')->prefix('user')->group(function(){
@@ -292,7 +293,7 @@ Route::middleware(['auth:sanctum', 'check.token.expiration'])->group(function() 
         Route::post('/prmp/ajout-champ', [AppelOffreChampsController::class, 'store']);
         Route::post('/prmp/appel-offre-donnees', [AppelOffreChampsController::class, 'saveDonneesChamps']);
         Route::put('/prmp/modif-champ-appel/{idChamp}', [AppelOffreChampsController::class, 'update']);
-        Route::delete('/prmp/delete-champ/{idChamp}', [AppelOffreChampsController::class, 'destroy']);
+        Route::delete('/prmp/delete-champ/{idChamp}', [AppelOffreChampsController::class, 'deleteChamps']);
         Route::get('/prmp/appels-offres', [AppelOffreChampsController::class, 'allAppels']);
         Route::get('/prmp/appels-offres/{id}', [AppelOffreChampsController::class, 'detailsAppel']);
         Route::delete('/prmp/appel-offre/{id}/delete', [AppelOffreChampsController::class, 'deleteAppelOffre']);
@@ -316,76 +317,6 @@ Route::middleware(['auth:sanctum', 'check.token.expiration'])->group(function() 
         Route::post('/pointage/depart', [PointageController::class, 'pointerDepart']);
         Route::get('/pointages', [PointageController::class, 'findAll']);
         Route::get('pointages/{idEmploye}', [PointageController::class, 'ficheByEmploye']);
+        Route::post('pointer/conge', [PointageController::class, 'pointerConge']);
     });
-
-    // Route::prefix('user')->group(function() {
-    //     // Service Accueil avec ses rôles spécifiques
-    //     // Route::middleware('service:Accueil')->prefix('accueil')->group(function() {
-    //         // Enregistrement visiteur
-    //         Route::middleware('verify-role:Enregistrer un visiteur')->group(function() {
-    //             Route::post('/visiteur', [VisiteurController::class, 'store']);
-    //         });
-
-    //         // Modification visiteur
-    //         Route::middleware('verify-role:Modifier un visiteur')->group(function() {
-    //             Route::put('/visiteur/{id}', [VisiteurController::class, 'update']);
-    //         });
-
-    //         // Suppression visiteur
-    //         Route::middleware('verify-role:Supprimer un visiteur')->group(function() {
-    //             Route::delete('/visiteur/{id}', [VisiteurController::class, 'destroy']);
-    //         });
-
-    //         // Visualisation de tous les visiteurs
-    //         Route::middleware('verify-role:Visualiser tous les visiteurs')->group(function() {
-    //             Route::get('/visiteurs', [VisiteurController::class, 'index']);
-    //         });
-
-    //         // Demande d'association entre visiteur et service
-    //         Route::middleware('verify-role:Demande une association entre visiteur et service')->group(function(){
-    //             Route::post('/associe-visiteur-service', [ServiceController::class, 'associeVisiteur']);
-    //         });
-
-    //         // Visualisation file d'attente par service
-    //         Route::middleware('verify-role:Visualisation file d\'attente par service')->group(function(){
-    //             Route::post('/file-d\'attente', [TicketController::class, 'ticketsLeJourJ']);
-    //         });
-
-    //         Route::get('/services/{idService}', [ServiceController::class, 'index']);
-    //         Route::get('/services', [ServiceController::class, 'getAllServicesExceptAccueil']);
-    //     // });
-
-    //     Route::middleware('direction:DIRECTION GENERALE')->group(function () {
-    //         // Route::middleware('service:PRMP')->prefix('prmp')->group(function(){
-    //             Route::prefix('prmp')->group(function() {
-    //                 Route::get('/appel-offre-champs', [AppelOffreChampsController::class, 'getFields']);
-    //                 Route::post('/ajout-champ', [AppelOffreChampsController::class, 'store']);
-    //                 Route::post('/appel-offre-donnees', [AppelOffreChampsController::class, 'saveDonneesChamps']);
-    //                 Route::put('/modif-champ-appel/{idChamp}', [AppelOffreChampsController::class, 'update']);
-    //                 Route::delete('/delete-champ/{idChamp}', [AppelOffreChampsController::class, 'destroy']);
-    //                 Route::get('/appels-offres', [AppelOffreChampsController::class, 'allAppels']);
-    //                 Route::get('/appels-offres/{id}', [AppelOffreChampsController::class, 'detailsAppel']);
-    //                 Route::delete('/appel-offre/{id}/delete', [AppelOffreChampsController::class, 'deleteAppelOffre']);
-
-    //                 Route::get('/references', [ReferencePpmController::class, 'index']);
-    //                 Route::post('/reference', [ReferencePpmController::class, 'store']);
-    //             });
-    //         // });
-    //     });
-
-    //     // Route::middleware('service:Ressource Humaine|Directeur General|Daf|PRMP')->group(function () {
-    //     // });
-
-
-    //     // Route::get('services/{id}/demandes', [ServiceController::class, 'demandeVisiteursParService']);
-    //     // Route::post('/service/generer-ticket', [ServiceController::class, 'genererTicket']);
-    //     // Route::post('/service/refuser-demande', [ServiceController::class, 'refuserDemande']);
-    //     // Route::post('/service/file-d\'attente', [TicketController::class, 'ticketsLeJourJ']);
-    //     // Route::post('/service/creneaux-register', [CreneauServiceController::class, 'store']);
-    //     // Route::get('/service/creneaux/{idService}', [CreneauServiceController::class, 'findAllService']);
-    //     // Route::delete('/service/{idService}/delete-creneaux/{id}', [CreneauServiceController::class, 'destroy']);
-    //     // Route::get('/service/{idService}/jours-disponible', [RendezVousController::class, 'jourDispoService']);
-    //     // Route::get('/service/{idService}/creneaux/{dayOfWeek}', [RendezVousController::class, 'findCreneauxServiceJour']);
-    //     // Route::get('/service/{idService}/rendez-vous', [RendezVousController::class, 'findRdvByService']);
-    // });
 });
