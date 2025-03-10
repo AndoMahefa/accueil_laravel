@@ -40,7 +40,7 @@ class RendezVousController extends Controller {
 
     public function store(Request $request) {
         $donnees = $request->validate([
-            'date_heure' => 'required|date|after:now',
+            'date_heure' => 'required|date|after_or_equal:now',
             'heure_fin' => 'required',
             'id_direction' => 'required|int|exists:direction,id',
             'id_service' => 'nullable|int|exists:service,id',

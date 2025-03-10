@@ -44,13 +44,6 @@ create table if not exists observation(
     deleted_at date
 );
 
-create table if not exists role_service(
-    id serial primary key,
-    role varchar(30) not null,
-
-    id_service int references service(id)
-);
-
 create table if not exists employe(
     id serial primary key,
     nom varchar(100) not null,
@@ -89,11 +82,6 @@ create table if not exists pointage(
 
     id_employe int references employe(id),
     id_statut int references statut(id)
-);
-
-create table if not exists role_employe(
-    id_employe int references employe(id),
-    id_role int references role_service(id)
 );
 
 create table if not exists utilisateur(
@@ -139,7 +127,8 @@ create table if not exists visiteur(
     prenom varchar(50) not null,
     cin varchar(20) unique not null,
     email varchar(50) unique not null,
-    telephone varchar(50)
+    telephone varchar(50),
+    genre varchar(20) not null
 );
 
 create table if not exists visiteur_service(
@@ -169,6 +158,7 @@ create table if not exists rdv(
     id serial primary key,
     date_heure timestamp not null,
     motif text,
+    heure_fin time,
 
     id_direction int references direction(id),
     id_service int references service(id),

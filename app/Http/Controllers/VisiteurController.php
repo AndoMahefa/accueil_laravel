@@ -27,15 +27,18 @@ class VisiteurController extends Controller {
     }
 
     public function store(Request $request) {
+        Log::info("Miditra");
+        Log::info($request->all());
         $donnees_valides = $request->validate([
             'nom' => 'required|string|max:50',
             'prenom' => 'required|string|max:50',
             'cin' => 'required|string|max:20',
             'email' => 'required|string|max:50|email|unique:visiteur,email',
-            'telephone' => 'required|string|max:50|regex:/^[0-9]+$/',
+            'telephone' => 'required|string|max:10|regex:/^[0-9]+$/',
             'genre' => 'required|string|max:20'
         ]);
 
+        Log::info($donnees_valides);
         $visiteur = $this->visiteurService->create($donnees_valides);
 
         return response()->json($visiteur, 201);

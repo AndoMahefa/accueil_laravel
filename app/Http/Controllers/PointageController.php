@@ -120,7 +120,6 @@ class PointageController extends Controller
             if (!$existeDeja) {
                 $congesCrees[] = Pointage::create([
                     'date' => $date,
-                    'heure_arrivee' => '00:00:00',
                     'session' => 1,
                     'id_employe' => $donnees['id_employe'],
                     'id_statut' => $statutConge->id

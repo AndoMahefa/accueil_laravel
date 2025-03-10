@@ -48,8 +48,17 @@ class IntervalleCreneauController extends Controller
         ]);
     }
 
+    public function deleteIntervalle($idIntervalle) {
+        $intervalle = IntervalleCreneau::findOrFail($idIntervalle);
+        $intervalle->delete();
+
+        return response()->json([
+            'message' => 'Intervalle supprimé avec succès'
+        ]);
+    }
+
     public function findByDirection($idDirection) {
-        $intervalle = IntervalleCreneau::findOrFail($idDirection);
+        $intervalle = IntervalleCreneau::where('id_direction', $idDirection)->first();
 
         return response()->json([
             'message' => 'Intervalle trouvé',
@@ -58,7 +67,7 @@ class IntervalleCreneauController extends Controller
     }
 
     public function findByService($idService) {
-        $intervalle = IntervalleCreneau::findOrFail($idService);
+        $intervalle = IntervalleCreneau::where('id_service', $idService)->first();
 
         return response()->json([
             'message' => 'Intervalle trouvé',

@@ -185,6 +185,7 @@ Route::middleware(['auth:sanctum', 'check.token.expiration'])->group(function() 
         Route::get('intervalles', [IntervalleCreneauController::class, 'getIntervalles']);
         Route::post('intervalle', [IntervalleCreneauController::class, 'store']);
         Route::put('intervalle/{idIntervalle}', [IntervalleCreneauController::class, 'update']);
+        Route::delete('intervalle/{idIntervalle}', [IntervalleCreneauController::class, 'deleteIntervalle']);
         Route::get('direction/{idDirection}/intervalle', [IntervalleCreneauController::class, 'findByDirection']);
         Route::get('service/{idService}/intervalle', [IntervalleCreneauController::class, 'findByService']);
         Route::get('jour/{idJour}', [DirectionController::class, 'findJour']);
