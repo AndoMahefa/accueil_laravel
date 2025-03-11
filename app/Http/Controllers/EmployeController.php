@@ -19,7 +19,6 @@ class EmployeController extends Controller {
 
     public function findEmployes() {
         $query = Employe::query()
-            ->with('roles')
             ->with('utilisateur')
             ->with('direction')
             ->with('service')
@@ -36,7 +35,6 @@ class EmployeController extends Controller {
     public function findEmployesByService($idService) {
         Log::info("id service : " . $idService);
         $query = Employe::query()
-            ->with('roles')
             ->with('utilisateur')
             ->with('direction')
             ->with('service')
@@ -53,7 +51,6 @@ class EmployeController extends Controller {
 
     public function findEmployesByDirection($idDirection) {
         $query = Employe::query()
-            ->with('roles')
             ->with('utilisateur')
             ->with('direction')
             ->with('service')
@@ -203,21 +200,21 @@ class EmployeController extends Controller {
         ], 201);
     }
 
-    public function deleteRoleEmploye($idEmploye, $idRole) {
-        RoleEmploye::where('id_employe', $idEmploye)
-            ->where('id_role', $idRole)
-            ->delete();
+    // public function deleteRoleEmploye($idEmploye, $idRole) {
+    //     RoleEmploye::where('id_employe', $idEmploye)
+    //         ->where('id_role', $idRole)
+    //         ->delete();
 
-        return response()->json([
-            'message' => 'Role supprimé avec succès',
-        ], 204);
-    }
+    //     return response()->json([
+    //         'message' => 'Role supprimé avec succès',
+    //     ], 204);
+    // }
 
-    public function getRolesByEmploye($idEmploye) {
-        $roles = RoleEmploye::where('id_employe', $idEmploye)
-            ->with('roleService')
-            ->get();
+    // public function getRolesByEmploye($idEmploye) {
+    //     $roles = RoleEmploye::where('id_employe', $idEmploye)
+    //         ->with('roleService')
+    //         ->get();
 
-        return response()->json($roles);
-    }
+    //     return response()->json($roles);
+    // }
 }

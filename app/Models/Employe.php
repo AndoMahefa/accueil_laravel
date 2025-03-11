@@ -31,9 +31,9 @@ class Employe extends Model {
         return $this->belongsTo(Service::class, 'id_service');
     }
 
-    public function roles() {
-        return $this->belongsToMany(RoleService::class, 'role_employe', 'id_employe', 'id_role');
-    }
+    // public function roles() {
+    //     return $this->belongsToMany(RoleService::class, 'role_employe', 'id_employe', 'id_role');
+    // }
 
     public function utilisateur() {
         return $this->hasOne(User::class, 'id_employe');

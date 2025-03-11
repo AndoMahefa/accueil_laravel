@@ -34,7 +34,7 @@ class Service extends Model{
         return $this->hasMany(Employe::class, 'id_service');
     }
 
-    public function roles() {
-        return $this->hasMany(RoleService::class, 'id_service');
-    }
+    // public function roles() {
+    //     return $this->hasMany(RoleService::class, 'id_service');
+    // }
 }
