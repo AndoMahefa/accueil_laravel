@@ -246,9 +246,3 @@ create table if not exists remise_offre(
     id_soumissionaire int references soumissionaire(id),
     id_appel_offre int references appel_offre_table(id)
 );
-
-
-select *
-from role_utilisateur as ru
-    join fonctionnalite as f on ru.id_fonctionnalite = f.id
-where ru.id_utilisateur = 9 and f.id_fonctionnalite is null;
