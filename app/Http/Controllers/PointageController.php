@@ -134,6 +134,41 @@ class PointageController extends Controller
         ], 201);
     }
 
+    public function pointerPermission(Request $request) {
+
+        $statut = Statut::where('statut', 'Permission')->first();
+
+        $request->validate([
+            'date' => 'required|date|after_or_equal:today',
+            'heure_arrivee' => 'nullable|date_format:H:i',
+            'heure_depart' => 'nullable|date_format:H:i',
+            'id_employe' => 'required|integer|exists:employe,id'
+        ]);
+
+        // Si c'est une permission pour une journée entière
+        if (empty($request->heure_arrivee) && empty($request->heure_depart)) {
+            $request->merge([
+                'heure_arrivee' => '00:00',
+                'heure_depart' => '23:59',
+            ]);
+        }
+
+        // Création de la permission
+        $pointage = Pointage::create([
+            'date' => $request->date,
+            'heure_arrivee' => $request->heure_arrivee,
+            'heure_depart' => $request->heure_depart,
+            'session' => 1, // Vous pouvez adapter cela selon vos besoins
+            'id_employe' => $request->id_employe,
+            'id_statut' => $statut->id,
+        ]);
+
+        return response()->json([
+            'message' => 'Permission enregistrée avec succès.',
+            'data' => $pointage,
+        ], 201);
+    }
+
     public function findAll(Request $request) {
         $query = Pointage::with('statut')
             ->with('employe');

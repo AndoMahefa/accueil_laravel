@@ -195,6 +195,7 @@ Route::middleware(['auth:sanctum', 'check.token.expiration'])->group(function() 
         Route::get('/pointages', [PointageController::class, 'findAll']);
         Route::get('/pointages/{idEmploye}', [PointageController::class, 'ficheByEmploye']);
         Route::post('pointer/conge', [PointageController::class, 'pointerConge']);
+        Route::post('pointer/permission', [PointageController::class, 'pointerPermission']);
     });
 
     Route::middleware('verify-role:user')->prefix('user')->group(function(){
