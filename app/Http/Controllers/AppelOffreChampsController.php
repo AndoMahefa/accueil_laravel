@@ -8,6 +8,8 @@ use App\Models\AppelOffreTable;
 use App\Models\AppelOffreChamps;
 use App\Models\Soumissionaire;
 use Carbon\Carbon;
+use App\Imports\AppelOffreImport;
+use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Http\Request;
 
 class AppelOffreChampsController extends Controller
@@ -90,6 +92,21 @@ class AppelOffreChampsController extends Controller
         }
 
         return response()->json(['message' => 'Données enregistrées avec succès'], 201);
+    }
+
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|file|mimes:xlsx',
+            'id_reference' => 'required|integer'
+        ]);
+
+        $file = $request->file('file');
+        $id_reference = $request->input('id_reference');
+
+        Excel::import(new AppelOffreImport($id_reference), $file);
+
+        return response()->json(['message' => 'Import réussi']);
     }
 
     public function allAppels(Request $request) {

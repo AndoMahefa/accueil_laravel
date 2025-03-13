@@ -227,25 +227,25 @@ EXECUTE FUNCTION refresh_accuse_mv();
 -- Accusé de reception
 
 
--- Marquage Absent
-CREATE OR REPLACE FUNCTION marquer_absents()
-RETURNS void AS $$
-BEGIN
-    INSERT INTO pointage (date, heure_arrivee, heure_depart, session, id_employe, id_statut)
-    SELECT
-        current_date, -- Date du jour
-        NULL, -- Pas d'heure d'arrivée
-        NULL, -- Pas d'heure de départ
-        1, -- Première session
-        e.id, -- ID de l'employé
-        s.id -- ID du statut "Absent"
-    FROM employe e
-    LEFT JOIN pointage p ON e.id = p.id_employe AND p.date = current_date
-    JOIN statut s ON s.statut = 'Absent'
-    WHERE p.id IS NULL; -- Sélectionne uniquement les employés qui n'ont pas encore pointé
-END;
-$$ LANGUAGE plpgsql;
--- Marquage Absent
+-- -- Marquage Absent
+-- CREATE OR REPLACE FUNCTION marquer_absents()
+-- RETURNS void AS $$
+-- BEGIN
+--     INSERT INTO pointage (date, heure_arrivee, heure_depart, session, id_employe, id_statut)
+--     SELECT
+--         current_date, -- Date du jour
+--         NULL, -- Pas d'heure d'arrivée
+--         NULL, -- Pas d'heure de départ
+--         1, -- Première session
+--         e.id, -- ID de l'employé
+--         s.id -- ID du statut "Absent"
+--     FROM employe e
+--     LEFT JOIN pointage p ON e.id = p.id_employe AND p.date = current_date
+--     JOIN statut s ON s.statut = 'Absent'
+--     WHERE p.id IS NULL; -- Sélectionne uniquement les employés qui n'ont pas encore pointé
+-- END;
+-- $$ LANGUAGE plpgsql;
+-- -- Marquage Absent
 
 
 -- Check Retard
