@@ -51,17 +51,39 @@ class TicketController extends Controller
     //     return response()->json($tickets);
     // }
 
-    public function ticketsLeJourJ($idDirection = null)
-    {
+    public function ticketsLeJourJ($idDirection = null) {
         $today = Carbon::now();
 
+        // return $idDirection;
+
         $query = Ticket::with('visiteur')
+            ->with('direction')
+            ->with('service')
             ->whereDate('date', $today)
             ->orderBy('heure_prevu', 'asc');
 
         if ($idDirection) {
             $query->where('id_direction', $idDirection);
+            $query->where('id_service', '=', null);
         }
+
+        $tickets = $query->get();
+
+        return response()->json($tickets);
+    }
+
+    public function ticketsLeJourJByService($idService = null) {
+        $today = Carbon::now();
+
+        // return $idService;
+
+        $query = Ticket::with('visiteur')
+            ->with('direction')
+            ->with('service')
+            ->whereDate('date', $today)
+            ->where('id_service', $idService)
+            ->orderBy('heure_prevu', 'asc');
+
 
         $tickets = $query->get();
 

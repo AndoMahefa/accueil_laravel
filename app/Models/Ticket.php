@@ -22,8 +22,15 @@ class Ticket extends Model
 
     public $timestamps = false;
 
-    public function visiteur()
-    {
+    public function visiteur() {
         return $this->belongsTo(Visiteur::class, 'id_visiteur');
+    }
+
+    public function direction() {
+        return $this->belongsTo(Direction::class, 'id_direction');
+    }
+
+    public function service() {
+        return $this->belongsTo(Service::class, 'id_service');
     }
 }
