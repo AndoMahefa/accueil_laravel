@@ -94,8 +94,7 @@ class AppelOffreChampsController extends Controller
         return response()->json(['message' => 'Données enregistrées avec succès'], 201);
     }
 
-    public function import(Request $request)
-    {
+    public function import(Request $request) {
         $request->validate([
             'file' => 'required|file|mimes:xlsx',
             'id_reference' => 'required|integer'
