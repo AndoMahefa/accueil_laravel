@@ -1,13 +1,26 @@
 <?php
 namespace App\Http\Controllers;
 
+use App\Exports\EmployeExport;
+use App\Exports\EmployeTemplateExport;
+use App\Imports\EmployeImport;
+use App\Models\Direction;
 use App\Models\Employe;
+use App\Models\Fonction;
+use App\Models\Observation;
 use App\Models\RoleEmploye;
+use App\Models\Service;
 use App\Services\EmployeService;
 use App\Services\UserService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Response;
+use Maatwebsite\Excel\Facades\Excel;
+use PhpOffice\PhpSpreadsheet\Cell\DataValidation;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 class EmployeController extends Controller {
     protected EmployeService $employeService;
@@ -17,12 +30,21 @@ class EmployeController extends Controller {
         $this->userService = $userService;
     }
 
-    public function findEmployes() {
+    public function findEmployes(Request $request) {
+        $search = $request->input('search');
+
         $query = Employe::query()
             ->with('utilisateur')
             ->with('direction')
             ->with('service')
+            ->with('observation')
             ->whereNull('deleted_at');
+
+        if($search) {
+            $query->where('nom', 'ilike', "%$search%")
+                ->orWhere('prenom', 'ilike', "%$search%")
+                ->orWhere('cin', 'ilike', "%$search%");
+        }
 
         $employes = $query->paginate(10);
 
@@ -32,15 +54,40 @@ class EmployeController extends Controller {
         ]);
     }
 
-    public function findEmployesByService($idService) {
+    // public function findEmployes() {
+    //     $query = Employe::query()
+    //         ->with('utilisateur')
+    //         ->with('direction')
+    //         ->with('service')
+    //         ->with('observation')
+    //         ->whereNull('deleted_at');
+
+    //     $employes = $query->paginate(10);
+
+    //     return response()->json([
+    //         'message' => 'liste des employes',
+    //         'employes' => $employes
+    //     ]);
+    // }
+
+    public function findEmployesByService($idService, Request $request) {
         Log::info("id service : " . $idService);
+        $search = $request->input('search');
+
         $query = Employe::query()
             ->with('utilisateur')
             ->with('direction')
             ->with('service')
+            ->with('observation')
             ->whereNull('deleted_at')
             ->where('id_service', $idService);
 
+        if($search) {
+            $query->where('nom', 'ilike', "%$search%")
+                ->orWhere('prenom', 'ilike', "%$search%")
+                ->orWhere('cin', 'ilike', "%$search%");
+        }
+
         $employes = $query->paginate(10);
 
         return response()->json([
@@ -49,13 +96,22 @@ class EmployeController extends Controller {
         ]);
     }
 
-    public function findEmployesByDirection($idDirection) {
+    public function findEmployesByDirection($idDirection, Request $request) {
+        $search = $request->input('search');
+
         $query = Employe::query()
             ->with('utilisateur')
             ->with('direction')
             ->with('service')
+            ->with('observation')
             ->whereNull('deleted_at')
             ->where('id_direction', $idDirection);
+
+        if($search) {
+            $query->where('nom', 'ilike', "%$search%")
+                ->orWhere('prenom', 'ilike', "%$search%")
+                ->orWhere('cin', 'ilike', "%$search%");
+        }
 
         $employes = $query->paginate(10);
 
@@ -161,60 +217,179 @@ class EmployeController extends Controller {
         ], 201);
     }
 
-    public function assignRolesToEmployee(Request $request) {
-        // Valider les données de la requête
-        $validatedData = $request->validate([
-            'id_employe' => 'required|exists:employe,id',
-            'id_roles' => 'required|array|min:1',
-            'id_roles.*' => 'exists:role_service,id',
+    public function import(Request $request) {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls'
         ]);
 
-        $idEmploye = $validatedData['id_employe'];
-        $roles = $validatedData['id_roles'];
-
-        // Liste des rôles déjà attribués
-        $existingRoles = RoleEmploye::where('id_employe', $idEmploye)
-            ->whereIn('id_role', $roles)
-            ->pluck('id_role')
-            ->toArray();
-
-        // Identifier les nouveaux rôles à ajouter
-        $newRoles = array_diff($roles, $existingRoles);
-
-        // Ajouter les nouveaux rôles
-        $roleEntries = [];
-        foreach ($newRoles as $idRole) {
-            $roleEntries[] = [
-                'id_employe' => $idEmploye,
-                'id_role' => $idRole,
-            ];
-        }
-
-        // Insérer les nouveaux rôles dans la base de données
-        RoleEmploye::insert($roleEntries);
-
-        return response()->json([
-            'message' => 'Rôles attribués avec succès.',
-            'added_roles' => $newRoles,
-            'existing_roles' => $existingRoles,
-        ], 201);
+        Excel::import(new EmployeImport, $request->file('file'));
+        return response()->json(['message' => 'Importation réussie']);
     }
 
-    // public function deleteRoleEmploye($idEmploye, $idRole) {
-    //     RoleEmploye::where('id_employe', $idEmploye)
-    //         ->where('id_role', $idRole)
-    //         ->delete();
+    public function exportTemplate() {
+        $spreadsheet = new Spreadsheet();
 
-    //     return response()->json([
-    //         'message' => 'Role supprimé avec succès',
-    //     ], 204);
-    // }
+        // Feuille principale (Bordereau)
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setTitle('Employe');
 
-    // public function getRolesByEmploye($idEmploye) {
-    //     $roles = RoleEmploye::where('id_employe', $idEmploye)
-    //         ->with('roleService')
-    //         ->get();
+        // En-têtes du fichier
+        $sheet->setCellValue('A1', 'Nom');
+        $sheet->setCellValue('B1', 'Prenom');
+        $sheet->setCellValue('C1', 'Date de naissance');
+        $sheet->setCellValue('D1', 'Adresse');
+        $sheet->setCellValue('E1', 'CIN');
+        $sheet->setCellValue('F1', 'Téléphone');
+        $sheet->setCellValue('G1', 'Genre');
+        $sheet->setCellValue('H1', 'Direction');
+        $sheet->setCellValue('I1', 'Service');
+        $sheet->setCellValue('J1', 'Fonction');
+        $sheet->setCellValue('K1', 'observation');
 
-    //     return response()->json($roles);
-    // }
+        $this->directionSheet($spreadsheet);
+        $this->serviceSheet($spreadsheet);
+        $this->fonctionSheet($spreadsheet);
+        $this->observationSheet($spreadsheet);
+
+        // Revenir à la première feuille
+        $spreadsheet->setActiveSheetIndex(0);
+
+        // Sauvegarde du fichier temporaire
+        $writer = new Xlsx($spreadsheet);
+        $fileName = 'employe_template.xlsx';
+        $tempFile = tempnam(sys_get_temp_dir(), $fileName);
+        $writer->save($tempFile);
+
+        return Response::download($tempFile, $fileName)->deleteFileAfterSend(true);
+    }
+
+    public function directionSheet($spreadsheet) {
+        $spreadsheet->createSheet();
+        $refSheet = $spreadsheet->setActiveSheetIndex(1);
+        $refSheet->setTitle('Directions');
+
+        $directions = Direction::all();
+        $row = 1;
+        foreach ($directions as $direction) {
+            $refSheet->setCellValue('A' . $row, $direction->nom);
+            $row++;
+        }
+
+        // Ajuster la largeur de la colonne pour voir les références
+        $refSheet->getColumnDimension('A')->setAutoSize(true);
+
+        // Utiliser toute la colonne A comme référence
+        $range = 'Directions!$A:$A';
+
+        // Appliquer la validation de données sur la colonne A de "Bordereau"
+        $sheet = $spreadsheet->setActiveSheetIndex(0);
+        for ($i = 2; $i <= 100; $i++) {
+            $validation = $sheet->getCell("H$i")->getDataValidation();
+            $validation->setType(DataValidation::TYPE_LIST);
+            $validation->setErrorStyle(DataValidation::STYLE_STOP);
+            $validation->setAllowBlank(false);
+            $validation->setShowDropDown(true);
+            $validation->setFormula1($range);
+        }
+    }
+
+    public function serviceSheet($spreadsheet) {
+        $spreadsheet->createSheet();
+        $refSheet = $spreadsheet->setActiveSheetIndex(2);
+        $refSheet->setTitle('Services');
+
+        $services = Service::all();
+        $row = 1;
+        foreach ($services as $service) {
+            $refSheet->setCellValue('A' . $row, $service->nom);
+            $row++;
+        }
+
+        // Ajuster la largeur de la colonne pour voir les références
+        $refSheet->getColumnDimension('A')->setAutoSize(true);
+
+        // Utiliser toute la colonne A comme référence
+        $range = 'Services!$A:$A';
+
+        // Appliquer la validation de données sur la colonne A de "Bordereau"
+        $sheet = $spreadsheet->setActiveSheetIndex(0);
+        for ($i = 2; $i <= 100; $i++) {
+            $validation = $sheet->getCell("I$i")->getDataValidation();
+            $validation->setType(DataValidation::TYPE_LIST);
+            $validation->setErrorStyle(DataValidation::STYLE_STOP);
+            $validation->setAllowBlank(false);
+            $validation->setShowDropDown(true);
+            $validation->setFormula1($range);
+        }
+    }
+
+    public function fonctionSheet($spreadsheet) {
+        $spreadsheet->createSheet();
+        $refSheet = $spreadsheet->setActiveSheetIndex(3);
+        $refSheet->setTitle('Fonctions');
+
+        $fonctions = Fonction::all();
+        $row = 1;
+        foreach ($fonctions as $fonction) {
+            $refSheet->setCellValue('A' . $row, $fonction->nom);
+            $row++;
+        }
+
+        // Ajuster la largeur de la colonne pour voir les références
+        $refSheet->getColumnDimension('A')->setAutoSize(true);
+
+        // Utiliser toute la colonne A comme référence
+        $range = 'Fonctions!$A:$A';
+
+        // Appliquer la validation de données sur la colonne A de "Bordereau"
+        $sheet = $spreadsheet->setActiveSheetIndex(0);
+        for ($i = 2; $i <= 100; $i++) {
+            $validation = $sheet->getCell("J$i")->getDataValidation();
+            $validation->setType(DataValidation::TYPE_LIST);
+            $validation->setErrorStyle(DataValidation::STYLE_STOP);
+            $validation->setAllowBlank(false);
+            $validation->setShowDropDown(true);
+            $validation->setFormula1($range);
+        }
+    }
+
+    public function observationSheet($spreadsheet) {
+        $spreadsheet->createSheet();
+        $refSheet = $spreadsheet->setActiveSheetIndex(4);
+        $refSheet->setTitle('Observations');
+
+        $observations = Observation::all();
+        $row = 1;
+        foreach ($observations as $observation) {
+            $refSheet->setCellValue('A' . $row, $observation->observation);
+            $row++;
+        }
+
+        // Ajuster la largeur de la colonne pour voir les références
+        $refSheet->getColumnDimension('A')->setAutoSize(true);
+
+        // Utiliser toute la colonne A comme référence
+        $range = 'Observations!$A:$A';
+
+        // Appliquer la validation de données sur la colonne A de "Bordereau"
+        $sheet = $spreadsheet->setActiveSheetIndex(0);
+        for ($i = 2; $i <= 100; $i++) {
+            $validation = $sheet->getCell("K$i")->getDataValidation();
+            $validation->setType(DataValidation::TYPE_LIST);
+            $validation->setErrorStyle(DataValidation::STYLE_STOP);
+            $validation->setAllowBlank(false);
+            $validation->setShowDropDown(true);
+            $validation->setFormula1($range);
+        }
+    }
+
+    public function export(Request $request) {
+        $directionId = $request->query('direction_id');
+        $serviceId = $request->query('service_id');
+
+        return Excel::download(
+            new EmployeExport($directionId, $serviceId),
+            'employes.xlsx'
+        );
+    }
 }

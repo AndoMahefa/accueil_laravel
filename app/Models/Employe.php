@@ -27,6 +27,13 @@ class Employe extends Model {
 
     protected $dates = ['deleted_at'];
 
+    // app/Models/Employe.php
+
+    protected $casts = [
+        'date_de_naissance' => 'date', // Ajoutez cette ligne
+        // ... autres casts
+    ];
+
     public function service() {
         return $this->belongsTo(Service::class, 'id_service');
     }
