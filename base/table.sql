@@ -126,9 +126,10 @@ create table if not exists visiteur(
     nom varchar(50) not null,
     prenom varchar(50) not null,
     cin varchar(20) unique not null,
-    email varchar(50) unique not null,
+    email varchar(50) unique,
     telephone varchar(50),
-    genre varchar(20) not null
+    genre varchar(20) not null,
+    entreprise varchar(150)
 );
 
 create table if not exists visiteur_service(
@@ -150,7 +151,7 @@ create table if not exists ticket(
     heure_validation time,
 
     id_direction int references direction(id),
-    -- id_service int references service(id),
+    id_service int references service(id),
     id_visiteur int references visiteur(id)
 );
 

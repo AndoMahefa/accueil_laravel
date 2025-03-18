@@ -118,6 +118,9 @@ Route::middleware(['auth:sanctum', 'check.token.expiration'])->group(function() 
         Route::delete('/employe/{idEmp}/delete', [EmployeController::class, 'destroy']);
         Route::get('/employes/deleted', [EmployeController::class, 'getDeletedEmployes']);
         Route::post('/employes/{id}/restore', [EmployeController::class, 'restore']);
+        Route::post('/employe/import', [EmployeController::class, 'import']);
+        Route::get('/employes/export', [EmployeController::class, 'export']);
+        Route::get('/employes/export-template', [EmployeController::class, 'exportTemplate']);
 
         // Creation utilisateur pour un employe
         Route::post('/employe/create-compte', [EmployeController::class, 'createUserForEmploye']);
@@ -140,12 +143,13 @@ Route::middleware(['auth:sanctum', 'check.token.expiration'])->group(function() 
         Route::post('accueil/demande-service', [ServiceController::class, 'associeVisiteur']);
         Route::post('accueil/file-d\'attente', [TicketController::class, 'ticketsLeJourJ']);
         Route::get('tickets/{idDirection?}', [TicketController::class, 'ticketsLeJourJ']);
+        Route::get('service/{idService}/tickets', [TicketController::class, 'ticketsLeJourJByService']);
         Route::post('accueil/remise-offre', [RemiseOffreController::class, 'store']);
 
 
         // Route pour les Services PRMP/RH/DG/Daf
-        // Route::get('services/{id}/demandes', [ServiceController::class, 'demandeVisiteursParService']);
-        Route::get('directions/demandes', [DirectionController::class, 'demandeVisiteurs']);
+        Route::get('services/{idService}/demandes', [ServiceController::class, 'demandeVisiteursParService']);
+        Route::get('/demandes', [DirectionController::class, 'demandeVisiteurs']);
         Route::get('directions/{idDirection}/demandes', [DirectionController::class, 'demandeVisiteursParDirection']);
         Route::post('/service/generer-ticket', [ServiceController::class, 'genererTicket']);
         Route::post('/service/refuser-demande', [ServiceController::class, 'refuserDemande']);
