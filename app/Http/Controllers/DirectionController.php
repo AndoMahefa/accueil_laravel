@@ -52,8 +52,7 @@ class DirectionController extends Controller
         ], 204);
     }
 
-    public function demandeVisiteursParDirection($idDirection)
-    {
+    public function demandeVisiteursParDirection($idDirection) {
         $direction = Direction::findOrFail($idDirection);
 
         if (!$direction) {
@@ -65,7 +64,18 @@ class DirectionController extends Controller
         $visiteurs = $direction->visiteurs()
             ->wherePivot('statut', 0)
             ->wherePivot('date_heure_arrivee', 'like', "$today%")
-            ->get();
+            ->where('id_service', '=', null)
+            ->get()
+            ->map(function($visiteur) use ($direction) {
+                $data = $visiteur->toArray();
+                // Fusionner les attributs du pivot dans le tableau principal
+                if (isset($data['pivot'])) {
+                    $data = array_merge($data, $data['pivot']);
+                    unset($data['pivot']);
+                }
+                $data['nom_direction'] = $direction->nom;
+                return $data;
+            });
 
         return response()->json([
             'message' => 'Liste des visiteurs avec statut 0.',
@@ -78,9 +88,10 @@ class DirectionController extends Controller
         $visiteurs = DB::table('visiteur_service')
             ->join('visiteur', 'visiteur_service.id_visiteur', '=', 'visiteur.id')
             ->join('direction', 'visiteur_service.id_direction', '=', 'direction.id')
+            ->leftJoin('service', 'visiteur_service.id_service', '=', 'service.id')
             ->where('visiteur_service.statut', 0)
             ->whereDate('visiteur_service.date_heure_arrivee', '>=', $today)
-            ->select('visiteur.*', 'visiteur_service.*', 'direction.nom as nom_direction') // Sélectionne les colonnes des deux tables
+            ->select('visiteur.*', 'visiteur_service.*', 'direction.nom as nom_direction', 'service.nom as nom_service') // Sélectionne les colonnes des deux tables
             ->get();
 
         return response()->json([

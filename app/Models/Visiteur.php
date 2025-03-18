@@ -16,7 +16,8 @@ class Visiteur extends Model {
         "cin",
         "email",
         "telephone",
-        "genre"
+        "genre",
+        "entreprise"
     ];
 
     // public function services() {

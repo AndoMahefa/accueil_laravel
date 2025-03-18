@@ -14,8 +14,18 @@ class VisiteurController extends Controller {
         $this->visiteurService = $visiteurService;
     }
 
-    public function index() {
-        $visiteurs = $this->visiteurService->findAll();
+    public function index(Request $request) {
+        $search = $request->input('search');
+
+        $query = Visiteur::select();
+        if($search) {
+            $query->where('nom', 'ilike', "%$search%")
+                ->orWhere('prenom', 'like', "%$search%")
+                ->orWhere('cin', 'ilike', "%$search%")
+                ->orWhere('email', 'like', "%$search%");
+        }
+
+        $visiteurs = $query->paginate(10);
 
         return response()->json($visiteurs);
     }
@@ -27,18 +37,16 @@ class VisiteurController extends Controller {
     }
 
     public function store(Request $request) {
-        Log::info("Miditra");
-        Log::info($request->all());
         $donnees_valides = $request->validate([
             'nom' => 'required|string|max:50',
             'prenom' => 'required|string|max:50',
             'cin' => 'required|string|max:20',
-            'email' => 'required|string|max:50|email|unique:visiteur,email',
+            'email' => 'nullable|string|max:50|email|unique:visiteur,email',
             'telephone' => 'required|string|max:10|regex:/^[0-9]+$/',
-            'genre' => 'required|string|max:20'
+            'genre' => 'required|string|max:20',
+            'entreprise' => 'nullable|string|max:150'
         ]);
 
-        Log::info($donnees_valides);
         $visiteur = $this->visiteurService->create($donnees_valides);
 
         return response()->json($visiteur, 201);

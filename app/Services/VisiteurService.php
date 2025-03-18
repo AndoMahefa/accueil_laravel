@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Visiteur;
+use Illuminate\Http\Request;
 
 class VisiteurService {
 
@@ -10,8 +11,15 @@ class VisiteurService {
         return Visiteur::create($data);
     }
 
-    public function findAll() {
-        return Visiteur::paginate(6);
+    public function findAll(?string $search = null) {
+        return Visiteur::when($search, function ($query) use ($search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('nom', 'like', "%$search%")
+                      ->orWhere('prenom', 'like', "%$search%")
+                      ->orWhere('email', 'like', "%$search%");
+                });
+            })
+            ->paginate(10);
     }
 
     public function findById($id) {
@@ -27,7 +35,7 @@ class VisiteurService {
     public function delete($id) {
         $service = $this->findById($id);
         $service->delete();
-        
+
         return $service;
     }
 }
