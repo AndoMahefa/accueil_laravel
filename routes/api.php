@@ -183,6 +183,8 @@ Route::middleware(['auth:sanctum', 'check.token.expiration'])->group(function() 
         Route::get('/prmp/offre/publies', [AppelOffreChampsController::class, 'getPublishedOffers']);
         Route::get('/prmp/soumissionaires', [AppelOffreChampsController::class, 'getSoumissionaire']);
         Route::post('prmp/appel-offre/import', [AppelOffreChampsController::class, 'import']);
+        Route::get('/prmp/appel-offre/{idAppel}/details', [AppelOffreChampsController::class, 'getDetails']);
+        Route::put('/prmp/appel-offre/{idAppel}/update', [AppelOffreChampsController::class, 'updateDonneesChamps']);
 
         Route::get('/prmp/references', [ReferencePpmController::class, 'index']);
         Route::post('/prmp/reference', [ReferencePpmController::class, 'store']);

@@ -25,7 +25,7 @@ class AppelOffreImport implements ToCollection, WithHeadingRow
         foreach ($rows as $row) {
             // Trouver l'objet
             $nomObjet = $champs->has('Objet')
-                ? $row[strtolower('Objet')] ?? "Appel d'offre " . uniqid()
+                ? $row['objet'] ?? "Appel d'offre " . uniqid()
                 : "Appel d'offre " . uniqid();
 
             $appelOffre = AppelOffreTable::create([
@@ -35,10 +35,13 @@ class AppelOffreImport implements ToCollection, WithHeadingRow
 
             // Mapping des données
             foreach ($champs as $nomChamp => $idChamp) {
-                if (isset($row[strtolower($nomChamp)])) {
+                // Convertir le nom du champ comme Excel le fait: minuscules et underscores au lieu d'espaces
+                $excelKey = str_replace(' ', '_', strtolower($nomChamp));
+
+                if (isset($row[$excelKey])) {
                     AppelOffreDonnees::create([
                         'id_appel_offre_champs' => $idChamp,
-                        'valeur' => $row[strtolower($nomChamp)],
+                        'valeur' => $row[$excelKey],
                         'id_appel_offre' => $appelOffre->id
                     ]);
                 }

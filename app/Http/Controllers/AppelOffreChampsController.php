@@ -11,6 +11,7 @@ use Carbon\Carbon;
 use App\Imports\AppelOffreImport;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class AppelOffreChampsController extends Controller
 {
@@ -94,6 +95,49 @@ class AppelOffreChampsController extends Controller
         return response()->json(['message' => 'Données enregistrées avec succès'], 201);
     }
 
+    public function updateDonneesChamps(Request $request, $id) {
+        // Valider les données reçues
+        $validated = $request->validate([
+            'donnees' => 'required|array',
+            'donnees.*.id' => 'required|integer|exists:appel_offre_donnees,id',
+            'donnees.*.valeur' => 'required|string',
+        ]);
+
+        // Vérifier si l'appel d'offre existe
+        $appelOffre = AppelOffreTable::findOrFail($id);
+
+        // Mettre à jour le titre/objet de l'appel d'offre si présent
+        $champObjet = AppelOffreChamps::where('nom_champ', 'Objet')->first();
+        if ($champObjet) {
+            $idChampObjet = $champObjet->id;
+
+            // Chercher si la donnée de l'objet est présente dans la requête
+            foreach ($validated['donnees'] as $donnee) {
+                $donneeBD = AppelOffreDonnees::find($donnee['id']);
+
+                if ($donneeBD && $donneeBD->id_appel_offre_champs == $idChampObjet) {
+                    // Mise à jour du titre de l'appel d'offre dans la table principale
+                    $appelOffre->update([
+                        'appel_offre' => $donnee['valeur']
+                    ]);
+                    break;
+                }
+            }
+        }
+
+        // Mettre à jour chaque donnée
+        foreach ($validated['donnees'] as $donnee) {
+            AppelOffreDonnees::where('id', $donnee['id'])->update([
+                'valeur' => $donnee['valeur']
+            ]);
+        }
+
+        return response()->json([
+            'message' => 'Données mises à jour avec succès',
+            'id_appel_offre' => $id
+        ], 200);
+    }
+
     public function import(Request $request) {
         $request->validate([
             'file' => 'required|file|mimes:xlsx',
@@ -113,7 +157,7 @@ class AppelOffreChampsController extends Controller
         $reference = $request->input('reference');
 
         // Charger les appels d'offres avec leurs données et champs associés
-        $query = AppelOffreTable::with(['donnees.champ', 'reference']);
+        $query = AppelOffreTable::with(['donnees.champ', 'reference', 'donnees']);
 
         // Filtrer par référence si spécifiée
         if ($reference) {
@@ -277,6 +321,17 @@ class AppelOffreChampsController extends Controller
         return response()->json([
             'status' => 'success',
             'soumissionaires' => $soumissionaires
+        ]);
+    }
+
+    public function getDetails($idAppel){
+        $details = DB::table('v_appel_details')
+            ->where('id_appel_offre', $idAppel)
+            ->get();
+
+        return response()->json([
+            'message' => 'Tous les details d\'un appel d\'offre',
+            'details' => $details
         ]);
     }
 
