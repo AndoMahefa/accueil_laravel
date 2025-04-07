@@ -95,19 +95,48 @@
     group by direction;
 
 -- Vue pour visites quotidiennes/mensuelles (RDV + Sans RDV)
-    CREATE OR REPLACE VIEW v_visites_par_periode AS
+    CREATE OR REPLACE VIEW v_visites_par_periode_avec_visiteurs AS
+    -- Visites sans RDV
     SELECT
-        DATE_TRUNC('day', date_heure_arrivee) AS jour,
-        DATE_TRUNC('month', date_heure_arrivee) AS mois,
-        COUNT(id_visiteur) AS total_visites
-    FROM visiteur_service
-    GROUP BY jour, mois
+        v.id AS id_visiteur,
+        v.nom,
+        v.prenom,
+        DATE_TRUNC('day', vs.date_heure_arrivee) AS jour,
+        DATE_TRUNC('month', vs.date_heure_arrivee) AS mois
+    FROM
+        visiteur_service vs
+    JOIN
+        visiteur v ON vs.id_visiteur = v.id
     UNION ALL
+    -- Visites avec RDV
     SELECT
-        DATE_TRUNC('day', date_heure) AS jour,
-        DATE_TRUNC('month', date_heure) AS mois,
-        COUNT(id_visiteur)
-    FROM rdv
+        v.id AS id_visiteur,
+        v.nom,
+        v.prenom,
+        DATE_TRUNC('day', r.date_heure) AS jour,
+        DATE_TRUNC('month', r.date_heure) AS mois
+    FROM
+        rdv r
+    JOIN
+        visiteur v ON r.id_visiteur = v.id;
+
+    CREATE OR REPLACE VIEW v_visites_par_periode_detail AS
+    SELECT
+        jour,
+        mois,
+        COUNT(id_visiteur) AS total_visites,
+        -- Liste des visiteurs (agrégés en JSON)
+        JSON_AGG(
+            JSON_BUILD_OBJECT(
+                'id', id_visiteur,
+                'nom', nom,
+                'prenom', prenom
+            )
+        ) AS visiteurs
+    FROM (
+        -- Requête combinée (Version 1)
+        SELECT * FROM v_visites_par_periode_avec_visiteurs
+    ) AS combined_data
     GROUP BY jour, mois;
 
 -- Vue pour fréquentation des visiteurs
