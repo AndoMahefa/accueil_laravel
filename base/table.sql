@@ -66,12 +66,12 @@ create table if not exists statut(
     statut varchar(20) not null
 );
 
-insert into statut (statut) values
-('Présent'),
-('Absent'),
-('Retard'),
-('Congé'),
-('Permission');
+insert into statut values
+    (default, 'Présent'),
+    (default, 'Absent'),
+    (default, 'Retard'),
+    (default, 'Congé'),
+    (default, 'Permission');
 
 create table if not exists pointage(
     id serial primary key,

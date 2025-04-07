@@ -12,6 +12,11 @@ use Illuminate\Support\Facades\Log;
 class PointageController extends Controller
 {
     public function pointerArrivee(Request $request) {
+        // $statuts = Statut::all();
+        // return response()->json([
+        //     'message' => 'Statuts disponibles',
+        //     'statuts' => $statuts
+        // ], 200);
         // Validation des données
         $request->validate([
             'id_employe' => 'required|int',

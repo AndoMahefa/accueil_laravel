@@ -38,31 +38,31 @@ begin
 end
 $$ language plpgsql;
 
-create or replace function insert_actions()
-returns void as $$
-begin
-    insert into actions values
-        -- Organigramme
-        (default, 'Ajouter une direction', 2),
-        (default, 'Ajouter un service', 2),
-        (default, 'Ajouter une fonction', 2),
-        (default, 'Modifier une direction', 2),
-        (default, 'Supprimer une direction', 2),
-        (default, 'Modifier un service', 2),
-        (default, 'Supprimer un service', 2),
+-- create or replace function insert_actions()
+-- returns void as $$
+-- begin
+--     insert into actions values
+--         -- Organigramme
+--         (default, 'Ajouter une direction', 2),
+--         (default, 'Ajouter un service', 2),
+--         (default, 'Ajouter une fonction', 2),
+--         (default, 'Modifier une direction', 2),
+--         (default, 'Supprimer une direction', 2),
+--         (default, 'Modifier un service', 2),
+--         (default, 'Supprimer un service', 2),
 
-        (default, 'Modifier un employé', 8),
-        (default, 'Supprimer un employé', 8),
-        (default, 'Attribuer un role à un employé', 8),
-        (default, 'Créer un compte', 8),
-        
-        (default, 'Ajouter une direction', 8),
-        (default, 'Ajouter une direction', 8),
+--         (default, 'Modifier un employé', 8),
+--         (default, 'Supprimer un employé', 8),
+--         (default, 'Attribuer un role à un employé', 8),
+--         (default, 'Créer un compte', 8),
 
-        (default, 'Ajouter une direction', 2),
-        (default, 'Ajouter une direction', 2),
-        (default, 'Ajouter une direction', 2),
-        (default, 'Ajouter une direction', 2),
-        (default, 'Ajouter une direction', 2),
-end
-$$ language plpgsql;
+--         (default, 'Ajouter une direction', 8),
+--         (default, 'Ajouter une direction', 8),
+
+--         (default, 'Ajouter une direction', 2),
+--         (default, 'Ajouter une direction', 2),
+--         (default, 'Ajouter une direction', 2),
+--         (default, 'Ajouter une direction', 2),
+--         (default, 'Ajouter une direction', 2),
+-- end
+-- $$ language plpgsql;

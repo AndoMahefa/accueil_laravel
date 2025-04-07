@@ -46,6 +46,9 @@ class AuthController extends Controller {
             $employe = Employe::with(['service', 'direction'])->find($user->id_employe);
 
             if ($employe) {
+                if($employe->service) {
+                    $idService = $employe->service->id;
+                }
                 $direction = Direction::findOrFail($employe->id_direction);
                 $utilisateur = $employe->utilisateur;
                 $roles = $this->fonctionnaliteService->getItemsByUser($utilisateur->id);

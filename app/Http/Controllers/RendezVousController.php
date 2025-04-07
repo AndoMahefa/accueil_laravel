@@ -7,27 +7,26 @@ use App\Services\RendezVousService;
 use App\Models\RendezVous;
 use App\Services\CreneauServiceManager;
 
-class RendezVousController extends Controller {
+class RendezVousController extends Controller
+{
     protected RendezVousService $rendezVousService;
     protected CreneauServiceManager $creneauService;
 
-    public function __construct(RendezVousService $rendezVousService, CreneauServiceManager $creneauService) {
+    public function __construct(RendezVousService $rendezVousService, CreneauServiceManager $creneauService)
+    {
         $this->rendezVousService = $rendezVousService;
         $this->creneauService = $creneauService;
     }
 
-    // public function index() {
-    //     return $this->rendezVousService->findAll();
-    // }
-
-    public function index(Request $request) {
+    public function index(Request $request)
+    {
         $date = $request->input('date');
 
         $query = RendezVous::with('visiteur')
             ->with('direction')
             ->with('service');
 
-        if($date) {
+        if ($date) {
             $query->whereDate('date_heure', $date);
         }
 
@@ -38,7 +37,49 @@ class RendezVousController extends Controller {
         ]);
     }
 
-    public function store(Request $request) {
+
+    public function findRdvByService($idService, Request $request)
+    {
+        $date = $request->input('date');
+
+        $query = RendezVous::where('id_service', $idService)
+            ->with('visiteur')
+            ->with('direction')
+            ->with('service');
+
+        if ($date) {
+            $query->whereDate('date_heure', $date);
+        }
+
+        $rdv = $query->get();
+        return response()->json([
+            'message' => 'Tous les rdv',
+            'rdv' => $rdv
+        ]);
+    }
+
+    public function findRdvByDirection($idDirection, Request $request)
+    {
+        $date = $request->input('date');
+
+        $query = RendezVous::where('id_direction', $idDirection)
+            ->with('visiteur')
+            ->with('direction')
+            ->with('service');
+
+        if ($date) {
+            $query->whereDate('date_heure', $date);
+        }
+
+        $rdv = $query->get();
+        return response()->json([
+            'message' => 'Tous les rdv',
+            'rdv' => $rdv
+        ]);
+    }
+
+    public function store(Request $request)
+    {
         $donnees = $request->validate([
             'date_heure' => 'required|date|after_or_equal:now',
             'heure_fin' => 'required',
@@ -55,7 +96,8 @@ class RendezVousController extends Controller {
         ]);
     }
 
-    public function findHeureIndispo(Request $request) {
+    public function findHeureIndispo(Request $request)
+    {
         $validated = $request->validate([
             'date' => 'required|date',
             'id_service' => 'required|integer|exists:service,id',
@@ -71,7 +113,8 @@ class RendezVousController extends Controller {
         return response()->json($indisponibilites);
     }
 
-    public function findHeureIndispoByDirection(Request $request) {
+    public function findHeureIndispoByDirection(Request $request)
+    {
         $validated = $request->validate([
             'date' => 'required|date',
             'id_direction' => 'required|integer|exists:direction,id',
@@ -79,6 +122,7 @@ class RendezVousController extends Controller {
 
         $indisponibilites = RendezVous::whereDate('date_heure', $validated['date'])
             ->where('id_direction', $validated['id_direction'])
+            ->whereNull('id_service')
             ->pluck('date_heure')
             ->map(function ($dateTime) {
                 return date('H:i', strtotime($dateTime));
@@ -87,32 +131,27 @@ class RendezVousController extends Controller {
         return response()->json($indisponibilites);
     }
 
-    public function jourDispoService($idService) {
+    public function jourDispoService($idService)
+    {
         $jourDispo = $this->creneauService->jourDispoService($idService);
-        return response()->json(['joursDispo'=> $jourDispo]);
+        return response()->json(['joursDispo' => $jourDispo]);
     }
 
-    public function jourDispoDirection($idDirection) {
+    public function jourDispoDirection($idDirection)
+    {
         $jourDispo = $this->creneauService->jourDispoDirection($idDirection);
-        return response()->json(['joursDispo'=> $jourDispo]);
+        return response()->json(['joursDispo' => $jourDispo]);
     }
 
-    public function findCreneauxServiceJour($idService, $day) {
+    public function findCreneauxServiceJour($idService, $day)
+    {
         $creneaux = $this->creneauService->getCreneauxServiceJour($idService, $day);
         return response()->json(['creneaux' => $creneaux]);
     }
 
-    public function findCreneauxDirectionJour($idDirection, $day) {
+    public function findCreneauxDirectionJour($idDirection, $day)
+    {
         $creneaux = $this->creneauService->getCreneauxDirectionJour($idDirection, $day);
         return response()->json(['creneaux' => $creneaux]);
-    }
-
-    public function findRdvByService($idService, Request $request) {
-        $date = $request->query('date');
-        $date = $date ?? now()->toDateString();
-
-        $rdvs = $this->rendezVousService->findRdvByService($idService, $date);
-
-        return response()->json(["rdv" => $rdvs]);
     }
 }

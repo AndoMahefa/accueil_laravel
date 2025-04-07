@@ -5,10 +5,14 @@ namespace App\Http\Controllers;
 use App\Models\Fonction;
 use Illuminate\Http\Request;
 
-class FonctionController extends Controller
-{
+class FonctionController extends Controller {
     public function getFonctions() {
-        return Fonction::all();
+        $fonctions = Fonction::with(['service', 'direction'])->paginate(10);
+
+        return response()->json([
+            'status' => 'success',
+            'fonctions' => $fonctions
+        ]);
     }
 
     public function store(Request $request) {

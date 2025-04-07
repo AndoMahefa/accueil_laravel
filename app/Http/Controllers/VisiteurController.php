@@ -7,18 +7,21 @@ use App\Models\Visiteur;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
-class VisiteurController extends Controller {
+class VisiteurController extends Controller
+{
     protected VisiteurService $visiteurService;
 
-    public function __construct(VisiteurService $visiteurService) {
+    public function __construct(VisiteurService $visiteurService)
+    {
         $this->visiteurService = $visiteurService;
     }
 
-    public function index(Request $request) {
+    public function index(Request $request)
+    {
         $search = $request->input('search');
 
         $query = Visiteur::select();
-        if($search) {
+        if ($search) {
             $query->where('nom', 'ilike', "%$search%")
                 ->orWhere('prenom', 'like', "%$search%")
                 ->orWhere('cin', 'ilike', "%$search%")
@@ -30,19 +33,21 @@ class VisiteurController extends Controller {
         return response()->json($visiteurs);
     }
 
-    public function show($id) {
+    public function show($id)
+    {
         $visiteur = $this->visiteurService->findById($id);
 
         return response()->json($visiteur);
     }
 
-    public function store(Request $request) {
+    public function store(Request $request)
+    {
         $donnees_valides = $request->validate([
             'nom' => 'required|string|max:50',
             'prenom' => 'required|string|max:50',
             'cin' => 'required|string|max:20',
             'email' => 'nullable|string|max:50|email|unique:visiteur,email',
-            'telephone' => 'required|string|max:10|regex:/^[0-9]+$/',
+            'telephone' => 'nullable|string|max:10|regex:/^[0-9]+$/',
             'genre' => 'required|string|max:20',
             'entreprise' => 'nullable|string|max:150'
         ]);
@@ -52,12 +57,13 @@ class VisiteurController extends Controller {
         return response()->json($visiteur, 201);
     }
 
-    public function update($id, Request $request) {
+    public function update($id, Request $request)
+    {
         $donnees_valides = $request->validate([
             'nom' => 'required|string|max:50',
             'prenom' => 'required|string|max:50',
             'cin' => 'required|string|max:20',
-            'email' => 'required|string|max:50|email|unique:visiteur,email,'.$id,
+            'email' => 'required|string|max:50|email|unique:visiteur,email,' . $id,
             'telephone' => 'required|string|max:50|regex:/^[0-9]+$/',
             'genre' => 'required|string|max:20'
         ]);
@@ -67,7 +73,8 @@ class VisiteurController extends Controller {
         return response()->json($visiteur);
     }
 
-    public function destroy($id){
+    public function destroy($id)
+    {
         $visiteur = $this->visiteurService->delete($id);
 
         return response()->json(null, 204);
@@ -91,5 +98,4 @@ class VisiteurController extends Controller {
             return response()->json([], 404);
         }
     }
-
 }
