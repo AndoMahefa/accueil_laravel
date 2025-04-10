@@ -1,19 +1,17 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use App\Exports\EmployeExport;
-use App\Exports\EmployeTemplateExport;
 use App\Imports\EmployeImport;
 use App\Models\Direction;
 use App\Models\Employe;
 use App\Models\Fonction;
 use App\Models\Observation;
-use App\Models\RoleEmploye;
 use App\Models\Service;
 use App\Services\EmployeService;
 use App\Services\UserService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Response;
@@ -22,15 +20,18 @@ use PhpOffice\PhpSpreadsheet\Cell\DataValidation;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
-class EmployeController extends Controller {
+class EmployeController extends Controller
+{
     protected EmployeService $employeService;
     protected UserService $userService;
-    public function __construct(EmployeService $employeService, UserService $userService) {
+    public function __construct(EmployeService $employeService, UserService $userService)
+    {
         $this->employeService = $employeService;
         $this->userService = $userService;
     }
 
-    public function findEmployes(Request $request) {
+    public function findEmployes(Request $request)
+    {
         $search = $request->input('search');
 
         $query = Employe::query()
@@ -40,7 +41,7 @@ class EmployeController extends Controller {
             ->with('observation')
             ->whereNull('deleted_at');
 
-        if($search) {
+        if ($search) {
             $query->where('nom', 'ilike', "%$search%")
                 ->orWhere('prenom', 'ilike', "%$search%")
                 ->orWhere('cin', 'ilike', "%$search%");
@@ -54,23 +55,8 @@ class EmployeController extends Controller {
         ]);
     }
 
-    // public function findEmployes() {
-    //     $query = Employe::query()
-    //         ->with('utilisateur')
-    //         ->with('direction')
-    //         ->with('service')
-    //         ->with('observation')
-    //         ->whereNull('deleted_at');
-
-    //     $employes = $query->paginate(10);
-
-    //     return response()->json([
-    //         'message' => 'liste des employes',
-    //         'employes' => $employes
-    //     ]);
-    // }
-
-    public function findEmployesByService($idService, Request $request) {
+    public function findEmployesByService($idService, Request $request)
+    {
         Log::info("id service : " . $idService);
         $search = $request->input('search');
 
@@ -82,7 +68,7 @@ class EmployeController extends Controller {
             ->whereNull('deleted_at')
             ->where('id_service', $idService);
 
-        if($search) {
+        if ($search) {
             $query->where('nom', 'ilike', "%$search%")
                 ->orWhere('prenom', 'ilike', "%$search%")
                 ->orWhere('cin', 'ilike', "%$search%");
@@ -96,7 +82,8 @@ class EmployeController extends Controller {
         ]);
     }
 
-    public function findEmployesByDirection($idDirection, Request $request) {
+    public function findEmployesByDirection($idDirection, Request $request)
+    {
         $search = $request->input('search');
 
         $query = Employe::query()
@@ -107,7 +94,7 @@ class EmployeController extends Controller {
             ->whereNull('deleted_at')
             ->where('id_direction', $idDirection);
 
-        if($search) {
+        if ($search) {
             $query->where('nom', 'ilike', "%$search%")
                 ->orWhere('prenom', 'ilike', "%$search%")
                 ->orWhere('cin', 'ilike', "%$search%");
@@ -121,7 +108,8 @@ class EmployeController extends Controller {
         ]);
     }
 
-    public function store(Request $request) {
+    public function store(Request $request)
+    {
         $validated = $request->validate([
             'nom' => 'required|string|max:100',
             'prenom' => 'required|string|max:100',
@@ -144,7 +132,8 @@ class EmployeController extends Controller {
         ], 201);
     }
 
-    public function update($id, Request $request) {
+    public function update($id, Request $request)
+    {
         $validated = $request->validate([
             'nom' => 'required|string|max:100',
             'prenom' => 'required|string|max:100',
@@ -166,10 +155,11 @@ class EmployeController extends Controller {
         ]);
     }
 
-    public function destroy($id) {
+    public function destroy($id)
+    {
         $this->employeService->delete($id);
 
-        return response()->json(['message'=>'Employe supprime avec succes'], 204);
+        return response()->json(['message' => 'Employe supprime avec succes'], 204);
     }
 
     public function getDeletedEmployes()
@@ -200,7 +190,8 @@ class EmployeController extends Controller {
         return response()->json(['message' => 'Cet employe n\'était pas supprimé']);
     }
 
-    public function createUserForEmploye(Request $request) {
+    public function createUserForEmploye(Request $request)
+    {
         $validated = $request->validate([
             'email' => 'required|email|unique:utilisateur,email',
             'mot_de_passe' => 'required|string|min:8',
@@ -217,7 +208,8 @@ class EmployeController extends Controller {
         ], 201);
     }
 
-    public function import(Request $request) {
+    public function import(Request $request)
+    {
         $request->validate([
             'file' => 'required|mimes:xlsx,xls'
         ]);
@@ -226,7 +218,8 @@ class EmployeController extends Controller {
         return response()->json(['message' => 'Importation réussie']);
     }
 
-    public function exportTemplate() {
+    public function exportTemplate()
+    {
         $spreadsheet = new Spreadsheet();
 
         // Feuille principale (Bordereau)
@@ -246,6 +239,18 @@ class EmployeController extends Controller {
         $sheet->setCellValue('J1', 'Fonction');
         $sheet->setCellValue('K1', 'observation');
 
+        $sheet->getColumnDimension('A')->setWidth(35);
+        $sheet->getColumnDimension('B')->setWidth(40);
+        $sheet->getColumnDimension('C')->setWidth(20);
+        $sheet->getColumnDimension('D')->setWidth(30);
+        $sheet->getColumnDimension('E')->setWidth(20);
+        $sheet->getColumnDimension('F')->setWidth(20);
+        $sheet->getColumnDimension('G')->setWidth(10);
+        $sheet->getColumnDimension('H')->setWidth(30);
+        $sheet->getColumnDimension('I')->setWidth(30);
+        $sheet->getColumnDimension('J')->setWidth(30);
+        $sheet->getColumnDimension('K')->setWidth(30);
+
         $this->directionSheet($spreadsheet);
         $this->serviceSheet($spreadsheet);
         $this->fonctionSheet($spreadsheet);
@@ -253,6 +258,7 @@ class EmployeController extends Controller {
 
         // Revenir à la première feuille
         $spreadsheet->setActiveSheetIndex(0);
+
 
         // Sauvegarde du fichier temporaire
         $writer = new Xlsx($spreadsheet);
@@ -263,7 +269,8 @@ class EmployeController extends Controller {
         return Response::download($tempFile, $fileName)->deleteFileAfterSend(true);
     }
 
-    public function directionSheet($spreadsheet) {
+    public function directionSheet($spreadsheet)
+    {
         $spreadsheet->createSheet();
         $refSheet = $spreadsheet->setActiveSheetIndex(1);
         $refSheet->setTitle('Directions');
@@ -293,7 +300,8 @@ class EmployeController extends Controller {
         }
     }
 
-    public function serviceSheet($spreadsheet) {
+    public function serviceSheet($spreadsheet)
+    {
         $spreadsheet->createSheet();
         $refSheet = $spreadsheet->setActiveSheetIndex(2);
         $refSheet->setTitle('Services');
@@ -323,7 +331,8 @@ class EmployeController extends Controller {
         }
     }
 
-    public function fonctionSheet($spreadsheet) {
+    public function fonctionSheet($spreadsheet)
+    {
         $spreadsheet->createSheet();
         $refSheet = $spreadsheet->setActiveSheetIndex(3);
         $refSheet->setTitle('Fonctions');
@@ -353,7 +362,8 @@ class EmployeController extends Controller {
         }
     }
 
-    public function observationSheet($spreadsheet) {
+    public function observationSheet($spreadsheet)
+    {
         $spreadsheet->createSheet();
         $refSheet = $spreadsheet->setActiveSheetIndex(4);
         $refSheet->setTitle('Observations');
@@ -383,7 +393,8 @@ class EmployeController extends Controller {
         }
     }
 
-    public function export(Request $request) {
+    public function export(Request $request)
+    {
         $directionId = $request->query('direction_id');
         $serviceId = $request->query('service_id');
 
