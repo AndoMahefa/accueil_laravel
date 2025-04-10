@@ -38,6 +38,39 @@ begin
 end
 $$ language plpgsql;
 
+
+INSERT INTO visiteur (nom, prenom, cin, email, telephone, genre, entreprise) VALUES
+('Randrianarisoa', 'Hery', '101010101010', 'hery.r@exemple.mg', '0321234567', 'Homme', 'Star'),
+('Ramanantsoa', 'Fara', '201020304050', 'fara.r@exemple.mg', '0339876543', 'Femme', 'Telma'),
+('Rakotomalala', 'Tojo', '303040506070', NULL, '0341112233', 'Homme', 'Orange'),
+('Rasolonirina', 'Mamy', '404050607080', 'mamy.r@exemple.mg', '0322233445', 'Homme', 'Jovenna'),
+('Andriamasinoro', 'Voahirana', '505060708090', 'voahirana.a@exemple.mg', '0334455667', 'Femme', NULL),
+('Razafindrakoto', 'Tiana', '606070809010', NULL, '0345566778', 'Homme', 'SBM'),
+('Ratsimbazafy', 'Malala', '707080901020', 'malala.r@exemple.mg', '0326677889', 'Femme', 'BMOI'),
+('Rakotomanga', 'Joel', '808090102030', 'joel.r@exemple.mg', '0337788990', 'Homme', NULL),
+('Andriamanalina', 'Sarobidy', '909010203040', NULL, '0348899001', 'Femme', 'Airtel'),
+('Randriamampionona', 'Fetra', '010203040506', 'fetra.r@exemple.mg', '0329900112', 'Homme', 'Air Madagascar'),
+('Rajoelina', 'Niry', '110203040506', 'niry.r@exemple.mg', '0331011121', 'Femme', 'Bionexx'),
+('Rakotobe', 'Lova', '120304050607', NULL, '0342122232', 'Homme', NULL),
+('Ratsiraka', 'Nomena', '130405060708', 'nomena.r@exemple.mg', '0323233343', 'Femme', 'FJKM'),
+('Andrianantenaina', 'Herisoa', '140506070809', 'herisoa.a@exemple.mg', '0334344454', 'Femme', 'UNICEF'),
+('Rabe', 'Tsito', '150607080910', NULL, '0345455565', 'Homme', 'CNAPS'),
+('Raharinirina', 'Soa', '160708091011', 'soa.r@exemple.mg', '0326566676', 'Femme', 'BOA'),
+('Rakotoarisoa', 'Lala', '170809101112', NULL, '0337677787', 'Femme', 'Hasina Construction'),
+('Razanajatovo', 'Hanta', '180910111213', 'hanta.r@exemple.mg', '0348788898', 'Femme', 'Ambatovy'),
+('Rafalimanana', 'Faly', '190101112131', 'faly.r@exemple.mg', '0329899909', 'Homme', NULL),
+('Andrianarivelo', 'Niry', '200202122232', NULL, '0330909090', 'Homme', 'SBM'),
+('Rakotoniaina', 'Zo', '210303133343', 'zo.r@exemple.mg', '0341234561', 'Homme', 'ENI'),
+('Razanaparany', 'Sitraka', '220404144454', NULL, '0322345672', 'Homme', NULL),
+('Randrianasolo', 'Mialy', '230505155565', 'mialy.r@exemple.mg', '0333456783', 'Femme', 'BFV-SG'),
+('Ravelojaona', 'Aina', '240606166676', 'aina.r@exemple.mg', '0344567894', 'Homme', 'Koloina SARL'),
+('Andriambaventy', 'Tahina', '250707177787', NULL, '0325678905', 'Homme', 'Viseo');
+
+-- Total : 25 visiteurs
+-- 15 ont un email
+-- 17 ont une entreprise
+
+
 -- create or replace function insert_actions()
 -- returns void as $$
 -- begin

@@ -172,3 +172,98 @@
         'Sans RDV' AS type,
         COUNT(id_visiteur)
     FROM visiteur_service;
+
+-- Vue : v_presence_journaliere
+    CREATE OR REPLACE VIEW v_presence_journaliere AS
+    SELECT
+        p.date,
+        e.nom,
+        e.prenom,
+        COUNT(CASE WHEN s.statut = 'Présent' THEN 1 END) AS presents,
+        COUNT(CASE WHEN s.statut = 'Absent' THEN 1 END) AS absents,
+        COUNT(CASE WHEN s.statut = 'Retard' THEN 1 END) AS retards
+    FROM
+        pointage p
+    JOIN
+        statut s ON p.id_statut = s.id
+    JOIN
+        employe e ON p.id_employe = e.id
+    GROUP BY
+        p.date, e.nom, e.prenom;
+
+-- Vue : v_retards_frequents
+    CREATE OR REPLACE VIEW v_retards_frequents AS
+    SELECT
+        e.id,
+        e.nom,
+        e.prenom,
+        COUNT(*) AS nombre_retards
+    FROM
+        pointage p
+    JOIN
+        employe e ON p.id_employe = e.id
+    JOIN
+        statut s ON p.id_statut = s.id
+    WHERE
+        s.statut = 'Retard'
+        AND DATE_TRUNC('month', p.date) = DATE_TRUNC('month', CURRENT_DATE)
+    GROUP BY
+        e.id
+    HAVING
+        COUNT(*) > 3;
+
+-- Vue : v_effectif_par_direction
+    CREATE OR REPLACE VIEW v_effectif_par_direction AS
+    SELECT
+        d.nom AS direction,
+        COUNT(e.id) AS effectif_total,
+        COUNT(CASE WHEN e.id IS NOT NULL AND e.deleted_at IS NULL THEN 1 END) AS actifs,
+        COUNT(CASE WHEN e.deleted_at IS NOT NULL THEN 1 END) AS inactifs
+    FROM
+        direction d
+    LEFT JOIN
+        employe e ON d.id = e.id_direction AND e.deleted_at IS NULL
+    GROUP BY
+        d.nom;
+
+-- Vue : v_occupation_services
+    CREATE OR REPLACE VIEW v_occupation_services AS
+    SELECT
+        s.nom AS service,
+        COUNT(e.id) FILTER (WHERE e.deleted_at IS NULL) AS actifs,
+        COUNT(e.id) FILTER (WHERE e.deleted_at IS NOT NULL) AS conges
+    FROM
+        service s
+    LEFT JOIN
+        employe e ON s.id = e.id_service
+    GROUP BY
+        s.nom;
+
+-- Vue : v_heures_moyennes
+    CREATE OR REPLACE VIEW v_heures_moyennes AS
+    SELECT
+        s.nom AS service,
+        AVG(EXTRACT(EPOCH FROM p.heure_arrivee)/3600) AS heure_arrivee_moyenne,
+        AVG(EXTRACT(EPOCH FROM p.heure_depart)/3600) AS heure_depart_moyenne
+    FROM
+        pointage p
+    JOIN
+        employe e ON p.id_employe = e.id
+    JOIN
+        service s ON e.id_service = s.id
+    GROUP BY
+        s.nom;
+
+    CREATE OR REPLACE VIEW v_heures_moyennes_direction AS
+    SELECT
+        d.nom AS direction,
+        AVG(EXTRACT(EPOCH FROM p.heure_arrivee)/3600) AS heure_arrivee_moyenne,
+        AVG(EXTRACT(EPOCH FROM p.heure_depart)/3600) AS heure_depart_moyenne
+    FROM
+        pointage p
+    JOIN
+        employe e ON p.id_employe = e.id
+    JOIN
+        direction d ON e.id_direction = d.id
+    GROUP BY
+        d.nom;

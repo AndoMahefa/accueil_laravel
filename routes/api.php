@@ -9,6 +9,7 @@ use App\Http\Controllers\RendezVousController;
 use App\Http\Controllers\CreneauServiceController;
 use App\Http\Controllers\AppelOffreController;
 use App\Http\Controllers\AppelOffreChampsController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DirectionController;
 use App\Http\Controllers\EmployeController;
 use App\Http\Controllers\FonctionController;
@@ -19,6 +20,7 @@ use App\Http\Controllers\PointageController;
 use App\Http\Controllers\ReferencePpmController;
 use App\Http\Controllers\RemiseOffreController;
 use Illuminate\Support\Facades\Route;
+use SebastianBergmann\CodeCoverage\Report\Html\Dashboard;
 
 /*
 |--------------------------------------------------------------------------
@@ -64,10 +66,12 @@ Route::get('/appel-offre', [AppelOffreController::class, 'index']);
 
 Route::get('/items', [FonctionnaliteController::class, 'items']);
 
-Route::middleware(['auth:sanctum', 'check.token.expiration'])->group(function() {
+Route::middleware(['auth:sanctum', 'check.token.expiration'])->group(function () {
     Route::get('service/{id}', [ServiceController::class, 'show']);
 
-    Route::middleware('verify-role:admin')->prefix('admin')->group(function(){
+    Route::middleware('verify-role:admin')->prefix('admin')->group(function () {
+        Route::get('/dashboard', [DashboardController::class, 'dashboard']);
+
         Route::get('/fonctionnalites', [FonctionnaliteController::class, 'items']);
         Route::get('/roles/utilisateur/{idUser}', [FonctionnaliteController::class, 'findRoleByUser']);
         Route::post('/fonctionnalite', [FonctionnaliteController::class, 'assignRoleUser']);
@@ -207,7 +211,7 @@ Route::middleware(['auth:sanctum', 'check.token.expiration'])->group(function() 
     });
 
 
-    Route::middleware('verify-role:user')->prefix('user')->group(function(){
+    Route::middleware('verify-role:user')->prefix('user')->group(function () {
         Route::get('/fonctionnalites', [FonctionnaliteController::class, 'items']);
         Route::get('/roles/utilisateur/{idUser}', [FonctionnaliteController::class, 'findRoleByUser']);
         Route::post('/fonctionnalite', [FonctionnaliteController::class, 'assignRoleUser']);
