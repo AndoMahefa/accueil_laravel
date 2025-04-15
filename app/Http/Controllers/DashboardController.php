@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
@@ -10,6 +11,7 @@ class DashboardController extends Controller
     {
         $visiteursService = DB::table('v_nb_visiteurs_service')->get();
         $visiteursDirection = DB::table('v_nb_visiteurs_direction')->get();
+        // $visiteursParPeriodes = DB::table('v_visites_par_periode_detail')->where('jour', '<=', Carbon::now())->orderBy('jour', 'desc')->get();
         $visiteursParPeriodes = DB::table('v_visites_par_periode_detail')->get();
         $frequentationVisiteurs = DB::table('v_type_visiteurs')->get();
         $comparaisonVisiteurs = DB::table('v_comparaison_rdv_sans_rdv')->get();

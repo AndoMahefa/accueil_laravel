@@ -104,6 +104,7 @@ class CreneauServiceManager
         return CreneauService::select('jour')
             ->distinct()
             ->where('id_direction', $idDirection)
+            ->whereNull('id_service')
             ->get();
     }
 

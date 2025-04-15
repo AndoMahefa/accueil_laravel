@@ -15,19 +15,22 @@ class CreneauServiceController extends Controller
         $this->creneauServiceManager = $creneauServiceManager;
     }
 
-    public function index() {
+    public function index()
+    {
         return $this->creneauServiceManager->findAll();
     }
 
-    public function findAllService($idService) {
+    public function findAllService($idService)
+    {
         $creneaux = $this->creneauServiceManager->findAllService($idService);
         return response()->json([
             'creneaux' => $creneaux,
         ]);
     }
 
-    public function findAllDirection($idDirection) {
-        $creneaux = CreneauService::where('id_direction', $idDirection)->get();
+    public function findAllDirection($idDirection)
+    {
+        $creneaux = CreneauService::where('id_direction', $idDirection)->whereNull('id_service')->get();
         return response()->json([
             'creneaux' => $creneaux,
         ]);
@@ -53,7 +56,8 @@ class CreneauServiceController extends Controller
     //     return response()->json(['message' => 'Créneaux ajoutés avec succès.'], 201);
     // }
 
-    public function store(Request $request) {
+    public function store(Request $request)
+    {
         $donnees = $request->validate([
             'jour' => 'required|int',
             'creneaux' => 'required|array',
@@ -76,7 +80,8 @@ class CreneauServiceController extends Controller
         return response()->json(['message' => 'Créneaux ajoutés avec succès.'], 201);
     }
 
-    public function destroyByService($idService, $idJour, Request $request) {
+    public function destroyByService($idService, $idJour, Request $request)
+    {
         $donnees = $request->validate([
             'periodes' => 'required|array',
         ]);
@@ -86,7 +91,8 @@ class CreneauServiceController extends Controller
         return response()->json(['message' => 'Créneau supprimé avec succès.']);
     }
 
-    public function destroyByDirection($idDirection, $idJour, Request $request) {
+    public function destroyByDirection($idDirection, $idJour, Request $request)
+    {
         $donnees = $request->validate([
             'periodes' => 'required|array',
         ]);
