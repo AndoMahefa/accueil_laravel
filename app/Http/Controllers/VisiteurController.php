@@ -63,9 +63,10 @@ class VisiteurController extends Controller
             'nom' => 'required|string|max:50',
             'prenom' => 'required|string|max:50',
             'cin' => 'required|string|max:20',
-            'email' => 'required|string|max:50|email|unique:visiteur,email,' . $id,
-            'telephone' => 'required|string|max:50|regex:/^[0-9]+$/',
-            'genre' => 'required|string|max:20'
+            'email' => 'nullable|string|max:50|email|unique:visiteur,email,' . $id,
+            'telephone' => 'nullable|string|max:50|regex:/^[0-9]+$/',
+            'genre' => 'required|string|max:20',
+            'entreprise' => 'nullable|string|max:150'
         ]);
 
         $visiteur = $this->visiteurService->update($id, $donnees_valides);
