@@ -96,7 +96,7 @@ class VisiteurController extends Controller
         if ($visitor) {
             return response()->json($visitor);
         } else {
-            return response()->json([], 404);
+            return response()->json([], 200);
         }
     }
 }
