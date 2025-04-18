@@ -9,83 +9,44 @@ use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Concerns\WithValidation;
 use Maatwebsite\Excel\Concerns\WithStartRow;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 use PhpOffice\PhpSpreadsheet\Shared\Date;
 
 class EmployeImport implements ToModel, WithHeadingRow, WithValidation, WithStartRow
 {
-    // Définir la ligne de début (après les en-têtes)
     public function startRow(): int
     {
-        return 2; // Commencer à la deuxième ligne
+        return 2;
     }
 
-    // Transformation des en-têtes
-    public function headingRow(): int {
-        return 1; // La première ligne contient les en-têtes
+    public function headingRow(): int
+    {
+        return 1;
     }
 
-    public function model(array $row) {
+    public function model(array $row)
+    {
         try {
-            // Convertir les noms/codes en IDs
-            $direction = Direction::where('nom', $row['direction'])->first();
-            $fonction = Fonction::where('nom', $row['fonction'])->first();
-            $observation = Observation::where('observation', $row['observation'])->first();
+            $direction = Direction::where('nom', $row['direction'])->firstOrFail();
+            $fonction = Fonction::where('nom', $row['fonction'])->firstOrFail();
+            $observation = Observation::where('observation', $row['observation'])->firstOrFail();
 
-            // Vérification des références
-            if (!$direction || !$fonction || !$observation) {
-                $missing = [];
-                if (!$direction) $missing[] = 'Direction: ' . $row['direction'];
-                if (!$fonction) $missing[] = 'Fonction: ' . $row['fonction'];
-                if (!$observation) $missing[] = 'Observation: ' . $row['observation'];
+            $dateNaissance = $this->parseDate($row['date_de_naissance']);
 
-                return null;
-            }
-
-            // Gestion de la date de naissance
-            try {
-                $dateValue = $row['date_de_naissance'];
-                $dateNaissance = null;
-
-                // Vérifier si c'est un nombre entier (date Excel)
-                if (is_numeric($dateValue)) {
-                    $dateNaissance = Carbon::instance(Date::excelToDateTimeObject((int)$dateValue));
-                }
-                // Essayer de parser comme date au format jour/mois/année
-                else {
-                    $dateNaissance = Carbon::createFromFormat('d/m/Y', $dateValue);
-                }
-
-                Log::info("Date de naissance convertie: " . $dateNaissance->format('Y-m-d'));
-
-            } catch (\Exception $e) {
-                return null;
-            }
-
-            // Recherche conditionnelle du service
             $id_service = null;
             if (!empty($row['service'])) {
                 $service = Service::where('nom', $row['service'])->first();
                 $id_service = $service ? $service->id : null;
             }
 
-            // Nettoyage des valeurs CIN et téléphone (suppression des espaces)
-            // $cin = str_replace(' ', '', $row['cin']);
-            // $telephone = str_replace(' ', '', $row['telephone']);
-
             $cin = $row['cin'];
             $telephone = $row['telephone'];
 
-            // Vérifier si le CIN existe déjà
-            $cinExists = DB::table('employe')->where('cin', str_replace(' ', '', $row['cin']))->exists();
-            if ($cinExists) {
+            if (DB::table('employe')->where('cin', $cin)->exists()) {
                 return null;
             }
 
-            // Vérifier si le téléphone existe déjà
-            $telExists = DB::table('employe')->where('telephone', str_replace(' ', '', $row['telephone']))->exists();
-            if ($telExists) {
+            if (DB::table('employe')->where('telephone', $telephone)->exists()) {
                 return null;
             }
 
@@ -107,8 +68,16 @@ class EmployeImport implements ToModel, WithHeadingRow, WithValidation, WithStar
         }
     }
 
-    public function rules(): array {
-        // Règles de validation minimales
+    private function parseDate($dateValue)
+    {
+        if (is_numeric($dateValue)) {
+            return Carbon::instance(Date::excelToDateTimeObject((int)$dateValue));
+        }
+        return Carbon::createFromFormat('d/m/Y', $dateValue);
+    }
+
+    public function rules(): array
+    {
         return [];
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Exports\EmployeExport;
+use App\Imports\EmpGlobalImport;
 use App\Imports\EmployeImport;
 use App\Models\Direction;
 use App\Models\Employe;
@@ -15,6 +16,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Response;
+use Illuminate\Validation\ValidationException;
 use Maatwebsite\Excel\Facades\Excel;
 use PhpOffice\PhpSpreadsheet\Cell\DataValidation;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
@@ -110,49 +112,107 @@ class EmployeController extends Controller
 
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'nom' => 'required|string|max:100',
-            'prenom' => 'required|string|max:100',
-            'date_de_naissance' => 'required|date',
-            'adresse' => 'required|string|max:75',
-            'cin' => 'required|string|max:25|unique:employe,cin',
-            'telephone' => 'required|string|max:25|unique:employe,telephone',
-            'genre' => 'required|string|max:20',
-            'id_fonction' => 'required|int|exists:fonction,id',
-            'id_direction' => 'required|int|exists:direction,id',
-            'id_observation' => 'required|int|exists:observation,id',
-            'id_service' => 'nullable|int|exists:service,id'
-        ]);
+        try {
+            $validated = $request->validate([
+                'nom' => 'required|string',
+                'prenom' => 'required|string',
+                'date_de_naissance' => 'required|date',
+                'adresse' => 'required|string|max:75',
+                'cin' => 'required|string|max:25|unique:employe,cin',
+                'telephone' => 'required|string|max:25|unique:employe,telephone',
+                'genre' => 'required|string|max:20',
+                'id_fonction' => 'required|int|exists:fonction,id',
+                'id_direction' => 'required|int|exists:direction,id',
+                'id_observation' => 'required|int|exists:observation,id',
+                'id_service' => 'nullable|int|exists:service,id'
+            ], [
+                'nom.required' => 'Le nom est requis.',
+                'nom.string' => 'Le nom doit être une chaîne de caractères.',
+                'prenom.required' => 'Le prénom est requis.',
+                'prenom.string' => 'Le prénom doit être une chaîne de caractères.',
+                'date_de_naissance.required' => 'La date de naissance est requise.',
+                'date_de_naissance.date' => 'La date de naissance doit être une date valide.',
+                'adresse.required' => 'L\'adresse est requise.',
+                'adresse.string' => 'L\'adresse doit être une chaîne de caractères.',
+                'adresse.max' => 'L\'adresse ne doit pas dépasser 75 caractères.',
+                'cin.required' => 'Le CIN est requis.',
+                'cin.unique' => 'Le CIN doit être unique.',
+                'telephone.required' => 'Le téléphone est requis.',
+                'telephone.unique' => 'Le téléphone doit être unique.',
+                'genre.required' => 'Le genre est requis.',
+                'id_fonction.required' => 'La fonction est requise.',
+                'id_fonction.exists' => 'La fonction sélectionnée n\'existe pas.',
+                'id_direction.required' => 'La direction est requise.',
+                'id_direction.exists' => 'La direction sélectionnée n\'existe pas.',
+                'id_observation.required' => 'L\'observation est requise.',
+                'id_observation.exists' => 'L\'observation sélectionnée n\'existe pas.',
+                'id_service.exists' => 'Le service sélectionné n\'existe pas.',
+            ]);
 
-        $employe = $this->employeService->create($validated);
+            $employe = $this->employeService->create($validated);
 
-        return response()->json([
-            'message' => 'Employé créé avec succès',
-            'employe' => $employe
-        ], 201);
+            return response()->json([
+                'message' => 'Employé créé avec succès',
+                'employe' => $employe
+            ], 201);
+        } catch (ValidationException $e) {
+            return response()->json([
+                'message' => 'Erreur de validation, veuillez vérifier les données fournies.',
+                'errors' => $e->errors()
+            ]);
+        }
     }
 
     public function update($id, Request $request)
     {
-        $validated = $request->validate([
-            'nom' => 'required|string|max:100',
-            'prenom' => 'required|string|max:100',
-            'date_de_naissance' => 'required|date',
-            'adresse' => 'required|string|max:75',
-            'cin' => 'required|string|max:25|unique:employe,cin,' . $id,
-            'telephone' => 'required|string|max:25|unique:employe,telephone,' . $id,
-            'genre' => 'required|string|max:20',
-            'id_fonction' => 'required|exists:fonction,id',
-            'id_direction' => 'required|exists:direction,id',
-            'id_observation' => 'required|exists:observation,id',
-            'id_service' => 'nullable|exists:service,id'
-        ]);
+        try {
+            $validated = $request->validate([
+                'nom' => 'required|string|max:100',
+                'prenom' => 'required|string|max:100',
+                'date_de_naissance' => 'required|date',
+                'adresse' => 'required|string|max:75',
+                'cin' => 'required|string|max:25|unique:employe,cin,' . $id,
+                'telephone' => 'required|string|max:25|unique:employe,telephone,' . $id,
+                'genre' => 'required|string|max:20',
+                'id_fonction' => 'required|exists:fonction,id',
+                'id_direction' => 'required|exists:direction,id',
+                'id_observation' => 'required|exists:observation,id',
+                'id_service' => 'nullable|exists:service,id'
+            ], [
+                'nom.required' => 'Le nom est requis.',
+                'nom.string' => 'Le nom doit être une chaîne de caractères.',
+                'prenom.required' => 'Le prénom est requis.',
+                'prenom.string' => 'Le prénom doit être une chaîne de caractères.',
+                'date_de_naissance.required' => 'La date de naissance est requise.',
+                'date_de_naissance.date' => 'La date de naissance doit être une date valide.',
+                'adresse.required' => 'L\'adresse est requise.',
+                'adresse.string' => 'L\'adresse doit être une chaîne de caractères.',
+                'adresse.max' => 'L\'adresse ne doit pas dépasser 75 caractères.',
+                'cin.required' => 'Le CIN est requis.',
+                'cin.unique' => 'Le CIN doit être unique.',
+                'telephone.required' => 'Le téléphone est requis.',
+                'telephone.unique' => 'Le téléphone doit être unique.',
+                'genre.required' => 'Le genre est requis.',
+                'id_fonction.required' => 'La fonction est requise.',
+                'id_fonction.exists' => 'La fonction sélectionnée n\'existe pas.',
+                'id_direction.required' => 'La direction est requise.',
+                'id_direction.exists' => 'La direction sélectionnée n\'existe pas.',
+                'id_observation.required' => 'L\'observation est requise.',
+                'id_observation.exists' => 'L\'observation sélectionnée n\'existe pas.',
+                'id_service.exists' => 'Le service sélectionné n\'existe pas.',
+            ]);
 
-        $emp = $this->employeService->update($id, $validated);
-        return response()->json([
-            'message' => 'employe mis a jour avec succes',
-            'employe' => $emp
-        ]);
+            $emp = $this->employeService->update($id, $validated);
+            return response()->json([
+                'message' => 'Employé mis a jour avec succes',
+                'employe' => $emp
+            ], 204);
+        } catch (ValidationException $e) {
+            return response()->json([
+                'message' => 'Erreur de validation, veuillez vérifier les données fournies.',
+                'errors' => $e->errors()
+            ]);
+        }
     }
 
     public function destroy($id)
@@ -214,7 +274,7 @@ class EmployeController extends Controller
             'file' => 'required|mimes:xlsx,xls'
         ]);
 
-        Excel::import(new EmployeImport, $request->file('file'));
+        Excel::import(new EmpGlobalImport, $request->file('file'));
         return response()->json(['message' => 'Importation réussie']);
     }
 
@@ -275,8 +335,10 @@ class EmployeController extends Controller
         $refSheet = $spreadsheet->setActiveSheetIndex(1);
         $refSheet->setTitle('Directions');
 
+        $refSheet->setCellValue('A1', 'Direction');
+
         $directions = Direction::all();
-        $row = 1;
+        $row = 2;
         foreach ($directions as $direction) {
             $refSheet->setCellValue('A' . $row, $direction->nom);
             $row++;
@@ -286,7 +348,10 @@ class EmployeController extends Controller
         $refSheet->getColumnDimension('A')->setAutoSize(true);
 
         // Utiliser toute la colonne A comme référence
-        $range = 'Directions!$A:$A';
+        // $lastDataRow = $row - 1; // Dernière ligne avec des données
+        // $range = 'Directions!$A$2:$A$' . $lastDataRow;
+        $range = 'Directions!$A$2:$A$1048576';
+
 
         // Appliquer la validation de données sur la colonne A de "Bordereau"
         $sheet = $spreadsheet->setActiveSheetIndex(0);
@@ -306,18 +371,27 @@ class EmployeController extends Controller
         $refSheet = $spreadsheet->setActiveSheetIndex(2);
         $refSheet->setTitle('Services');
 
-        $services = Service::all();
-        $row = 1;
+        // En-têtes
+        $refSheet->setCellValue('A1', 'Service');
+        $refSheet->setCellValue('B1', 'Direction');
+
+        $services = Service::with('direction')->get();
+        $row = 2;
         foreach ($services as $service) {
             $refSheet->setCellValue('A' . $row, $service->nom);
+            $refSheet->setCellValue('B' . $row, $service->direction->nom);
             $row++;
         }
 
         // Ajuster la largeur de la colonne pour voir les références
         $refSheet->getColumnDimension('A')->setAutoSize(true);
+        $refSheet->getColumnDimension('B')->setAutoSize(true);
 
         // Utiliser toute la colonne A comme référence
-        $range = 'Services!$A:$A';
+        // $range = 'Services!$A:$A';
+        $range = 'Services!$A$2:$A$1048576';
+        // $lastDataRow = $row - 1; // Dernière ligne avec des données
+        // $range = 'Services!$A$2:$A$' . $lastDataRow;
 
         // Appliquer la validation de données sur la colonne A de "Bordereau"
         $sheet = $spreadsheet->setActiveSheetIndex(0);
@@ -337,18 +411,31 @@ class EmployeController extends Controller
         $refSheet = $spreadsheet->setActiveSheetIndex(3);
         $refSheet->setTitle('Fonctions');
 
-        $fonctions = Fonction::all();
-        $row = 1;
+        // En-têtes
+        $refSheet->setCellValue('A1', 'Fonction');
+        $refSheet->setCellValue('B1', 'Direction');
+        $refSheet->setCellValue('C1', 'Service');
+
+
+        $fonctions = Fonction::with('direction', 'service')->get();
+        $row = 2;
         foreach ($fonctions as $fonction) {
             $refSheet->setCellValue('A' . $row, $fonction->nom);
+            $refSheet->setCellValue('B' . $row, $fonction->direction->nom);
+            $refSheet->setCellValue('C' . $row, $fonction->service ? $fonction->service->nom : '');
             $row++;
         }
 
         // Ajuster la largeur de la colonne pour voir les références
         $refSheet->getColumnDimension('A')->setAutoSize(true);
+        $refSheet->getColumnDimension('B')->setAutoSize(true);
+        $refSheet->getColumnDimension('C')->setAutoSize(true);
 
         // Utiliser toute la colonne A comme référence
-        $range = 'Fonctions!$A:$A';
+        // $range = 'Fonctions!$A:$A';
+        $range = 'Fonctions!$A$2:$A$1048576';
+        // $lastDataRow = $row - 1; // Dernière ligne avec des données
+        // $range = 'Fonctions!$A$2:$A$' . $lastDataRow;
 
         // Appliquer la validation de données sur la colonne A de "Bordereau"
         $sheet = $spreadsheet->setActiveSheetIndex(0);
@@ -368,8 +455,10 @@ class EmployeController extends Controller
         $refSheet = $spreadsheet->setActiveSheetIndex(4);
         $refSheet->setTitle('Observations');
 
+        $refSheet->setCellValue('A1', 'Observation');
+
         $observations = Observation::all();
-        $row = 1;
+        $row = 2;
         foreach ($observations as $observation) {
             $refSheet->setCellValue('A' . $row, $observation->observation);
             $row++;
@@ -379,7 +468,10 @@ class EmployeController extends Controller
         $refSheet->getColumnDimension('A')->setAutoSize(true);
 
         // Utiliser toute la colonne A comme référence
-        $range = 'Observations!$A:$A';
+        $range = 'Observations!$A$2:$A$1048576';
+        // $lastDataRow = $row - 1; // Dernière ligne avec des données
+        // $range = 'Observations!$A$2:$A$' . $lastDataRow;
+        // $range = 'Observations!$A:$A';
 
         // Appliquer la validation de données sur la colonne A de "Bordereau"
         $sheet = $spreadsheet->setActiveSheetIndex(0);
